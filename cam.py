@@ -10,10 +10,40 @@ class Camera(QThread):
     sig_foto = pyqtSignal(object)
 
     def __init__(self):
-				logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.WARNING)
+        logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.WARNING)
         self.cmd_fifo = queue.Queue()
-        self.cam = gp.
 
+        gp.check_result(gp.use_python_logging())
+        
+        # copy+paste: gphoto2/examples/preview-image.py
+        self.cam = gp.check_result(gp.gp_camera_new())
+        gp.check_result(gp.gp_camera_init(self.cam))
+        
+        # required configuration will depend on camera type!
+        print('Checking camera config')
+        # get configuration tree
+        config = gp.check_result(gp.gp_camera_get_config(camera))
+        # find the image format config item
+        # camera dependent - 'imageformat' is 'imagequality' on some
+        OK, image_format = gp.gp_widget_get_child_by_name(config, 'imageformat')
+        if OK >= gp.GP_OK:
+            # get current setting
+            value = gp.check_result(gp.gp_widget_get_value(image_format))
+            # make sure it's not raw
+            if 'raw' in value.lower():
+                print('Cannot preview raw images')
+                return 1
+        # find the capture size class config item
+        # need to set this on my Canon 350d to get preview to work at all
+        OK, capture_size_class = gp.gp_widget_get_child_by_name( config, 'capturesizeclass')
+        if OK >= gp.GP_OK:
+            # set value
+            value = gp.check_result(gp.gp_widget_get_choice(capture_size_class, 2))
+            gp.check_result(gp.gp_widget_set_value(capture_size_class, value))
+            # set config
+            gp.check_result(gp.gp_camera_set_config(camera, config))
+        
+        
     def start_live(self):
         '''
         Startet die Vorschau. Daten werden via sig_live_view gesendet
@@ -26,11 +56,11 @@ class Camera(QThread):
         '''
         self.cmd_fifo.put(const.STATE_BILD)
 
-		def fetch_preview(self):
-				'''
-				Holt ein einzelnes Vorschaubild von der Kamera
-				'''
-				camera_file = self._cap.capture_preview()
+    def fetch_preview(self):
+        '''
+        Holt ein einzelnes Vorschaubild von der Kamera
+        '''
+        camera_file = self._cap.capture_preview()
         file_data = camera_file.get_data_and_size()
         return Image.open(io.BytesIO(file_data))
 
