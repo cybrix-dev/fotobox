@@ -10,19 +10,20 @@ class Camera(QThread):
     sig_foto = pyqtSignal(object)
 
     def __init__(self):
+        print("Camera.__init__()")
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.WARNING)
         self.cmd_fifo = queue.Queue()
 
         gp.check_result(gp.use_python_logging())
-        
+
         # copy+paste: gphoto2/examples/preview-image.py
         self.cam = gp.check_result(gp.gp_camera_new())
         gp.check_result(gp.gp_camera_init(self.cam))
-        
+
         # required configuration will depend on camera type!
         print('Checking camera config')
         # get configuration tree
-        config = gp.check_result(gp.gp_camera_get_config(camera))
+        config = gp.check_result(gp.gp_camera_get_config(self.cam))
         # find the image format config item
         # camera dependent - 'imageformat' is 'imagequality' on some
         OK, image_format = gp.gp_widget_get_child_by_name(config, 'imageformat')
@@ -41,9 +42,9 @@ class Camera(QThread):
             value = gp.check_result(gp.gp_widget_get_choice(capture_size_class, 2))
             gp.check_result(gp.gp_widget_set_value(capture_size_class, value))
             # set config
-            gp.check_result(gp.gp_camera_set_config(camera, config))
-        
-        
+            gp.check_result(gp.gp_camera_set_config(self.cam, config))
+
+
     def start_live(self):
         '''
         Startet die Vorschau. Daten werden via sig_live_view gesendet
