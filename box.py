@@ -5,12 +5,13 @@ Created on 24.02.2020
 '''
 from ui import Ui_MainWindow as ui
 import const
+from cam import Camera as cam
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import subprocess
-from sh import gphoto2 as gp
+
 
 class MainWindowB(QMainWindow):
     
@@ -72,6 +73,8 @@ class Box(QObject):
         self.ui.btAbbruch.clicked.connect(self.slot_btAbbruch)
         self.ui.btSd.clicked.connect(self.slot_btSd)
         self.ui.btUsb.clicked.connect(self.slot_btUsb)
+        self.ui.btConfig.clicked.connect(self.slot_btConfig)
+				
         
         self.count_timer.timeout.connect(self.slot_countdown)
         self.bist_timer.timeout.connect(self.slot_bist)
@@ -79,6 +82,8 @@ class Box(QObject):
         parent.sigResize.connect(self.updateGui)
         parent.showFullScreen()        
         
+				self.cam = cam()
+				
         ''' start '''
         self.changeState(const.STATE_LIVE)
 
@@ -294,6 +299,13 @@ class Box(QObject):
         - Konfiguration/Debug
         '''
         print("Config")
+				picture = QPixmap(self.cam.fetch_preview()).scaled(self.ui.bild.width(), self.ui.bild.height(), Qt.KeepAspectRatioByExpanding)
+            
+				self.ui.bild.setPixmap(picture)
+				self.ui.bild.setAlignment(Qt.AlignHCenter)
+				self.ui.bild.setAlignment(Qt.AlignCenter)
+				self.ui.bild.show()
+				
 
         
 if __name__ == "__main__":
