@@ -1,6 +1,7 @@
 from PyQt5.QtCore import *
 import const
 import queue
+import logging
 import gphoto2 as gp
 
 class Camera(QThread):
@@ -9,6 +10,7 @@ class Camera(QThread):
     sig_foto = pyqtSignal(object)
 
     def __init__(self):
+				logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.WARNING)
         self.cmd_fifo = queue.Queue()
         self.cam = gp.
 
@@ -24,6 +26,15 @@ class Camera(QThread):
         '''
         self.cmd_fifo.put(const.STATE_BILD)
 
+		def fetch_preview(self):
+				'''
+				Holt ein einzelnes Vorschaubild von der Kamera
+				'''
+				camera_file = self._cap.capture_preview()
+        file_data = camera_file.get_data_and_size()
+        return Image.open(io.BytesIO(file_data))
+
+
     def run(self):
         state = const.STATE_LIVE
         while True:
@@ -32,10 +43,7 @@ class Camera(QThread):
 
             if state == const.STATE_LIVE:
                 '''
-                camera_file = self._cap.capture_preview()
-                file_data = camera_file.get_data_and_size()
-                return Image.open(io.BytesIO(file_data))
-                ---
+                picture = self.fetch_preview()
                 if self._rotation is not None:
                     picture = picture.transpose(self._rotation)
                 picture = picture.resize(self._pic_dims.previewSize)
