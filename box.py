@@ -299,7 +299,9 @@ class Box(QObject):
         - Konfiguration/Debug
         '''
         print("Config")
-        picture = QPixmap(self.cam.fetch_preview()).scaled(self.ui.bild.width(), self.ui.bild.height(), Qt.KeepAspectRatioByExpanding)
+        picture = self.cam.fetch_preview().scaled(self.ui.bild.width(),
+                                                  self.ui.bild.height(),
+                                                  Qt.KeepAspectRatioByExpanding)
 
         self.ui.bild.setPixmap(picture)
         self.ui.bild.setAlignment(Qt.AlignHCenter)

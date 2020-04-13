@@ -1,5 +1,7 @@
 from PyQt5.QtCore import *
+from PyQt5.QtGui import QPixmap
 import const
+import io
 import queue
 import logging
 import gphoto2 as gp
@@ -17,7 +19,7 @@ class Camera(QThread):
         gp.check_result(gp.use_python_logging())
 
         # copy+paste: gphoto2/examples/preview-image.py
-        self.cam = gp.check_result(gp.gp_camera_new())
+        self.cam = gp.check_result(gp.gpself.camera_new())
         gp.check_result(gp.gp_camera_init(self.cam))
 
         # required configuration will depend on camera type!
@@ -68,7 +70,11 @@ class Camera(QThread):
         # camera_file = self._cap.capture_preview()
         # file_data = camera_file.get_data_and_size()
         # return Image.open(io.BytesIO(file_data))
-        return QPixmap(io.BytesIO(file_data))
+
+        # return QPixmap().loadFromData(io.BytesIO(file_data).getvalue())
+        result = QPixmap()
+        result.loadFromData(file_data)
+        return result
 
     def run(self):
         state = const.STATE_LIVE
@@ -78,7 +84,6 @@ class Camera(QThread):
 
             if state == const.STATE_LIVE:
                 '''
-                picture = self.fetch_preview()
                 if self._rotation is not None:
                     picture = picture.transpose(self._rotation)
                 picture = picture.resize(self._pic_dims.previewSize)
@@ -86,6 +91,7 @@ class Camera(QThread):
                 byte_data = BytesIO()
                 picture.save(byte_data, format='jpeg')
                 '''
+                self.emit( sig_live_view, self.fetch_preview() )
             elif state == const.STATE_BILD:
                 '''
                 file_path = self._cap.capture(gp.GP_CAPTURE_IMAGE)
