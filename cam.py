@@ -61,10 +61,14 @@ class Camera(QThread):
         '''
         Holt ein einzelnes Vorschaubild von der Kamera
         '''
-        camera_file = self._cap.capture_preview()
-        file_data = camera_file.get_data_and_size()
-        return Image.open(io.BytesIO(file_data))
-
+        # capture preview image (not saved to camera memory card)
+        print('Capturing preview image')
+        camera_file = gp.check_result(gp.gp_camera_capture_preview(self.cam))
+        file_data = gp.check_result(gp.gp_file_get_data_and_size(camera_file))
+        # camera_file = self._cap.capture_preview()
+        # file_data = camera_file.get_data_and_size()
+        # return Image.open(io.BytesIO(file_data))
+        return QPixmap(io.BytesIO(file_data))
 
     def run(self):
         state = const.STATE_LIVE
