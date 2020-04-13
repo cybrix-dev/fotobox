@@ -100,3 +100,4 @@ class Camera(QThread):
                 file_data = camera_file.get_data_and_size()
                 return Image.open(io.BytesIO(file_data))
                 '''
+                state = const.STATE_IDLE

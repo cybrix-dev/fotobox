@@ -83,6 +83,7 @@ class Box(QObject):
         parent.showFullScreen()
 
         self.cam = Camera()
+        self.cam.sig_live_view.connect(self.slot_preview)
 
         ''' start '''
         self.changeState(const.STATE_LIVE)
@@ -213,6 +214,7 @@ class Box(QObject):
             self.ui.video.show()
             self.setButtonImg(self.ui.btUntenRechts, const.IMG_CAM)
             self.ui.btConfig.show()
+            self.cam.start_live()
 
         elif state == const.STATE_COUNT:
             '''
@@ -227,19 +229,20 @@ class Box(QObject):
 
         elif state == const.STATE_BILD:
             self.count_timer.stop()
-
+            self.cam.capture_image()
             print("Bild runterladen + anzeigen")
-            picture = QPixmap("./icons/test.jpg").scaled(self.ui.bild.width(), self.ui.bild.height(), Qt.KeepAspectRatioByExpanding)
-
-            self.ui.bild.setPixmap(picture)
-            self.ui.bild.setAlignment(Qt.AlignHCenter)
-            self.ui.bild.setAlignment(Qt.AlignCenter)
-            self.ui.bild.show()
 
             self.setButtonImg(self.ui.btUntenRechts, const.IMG_OK)
             self.ui.btAbbruch.show()
 
         self.state = state
+        
+    def showImage(self, image):
+        image.scaled(self.ui.bild.width(), self.ui.bild.height(), Qt.KeepAspectRatioByExpanding)
+        self.ui.bild.setPixmap(picture)
+        self.ui.bild.setAlignment(Qt.AlignHCenter)
+        self.ui.bild.setAlignment(Qt.AlignCenter)
+        self.ui.bild.show()
 
     def slot_bist(self):
         self.checkMemory()
@@ -308,7 +311,18 @@ class Box(QObject):
         self.ui.bild.setAlignment(Qt.AlignCenter)
         self.ui.bild.show()
 
-
+    def slot_preview(self, image):
+        '''
+        Receiver-slot fuer Liveview (nur im RAM)
+        '''
+        showImage(image)
+        
+    def slot_image(self, image):
+        '''
+        Receiver-slot fuer Fotos
+        '''
+        showImage(image)
+        
 
 if __name__ == "__main__":
     import sys

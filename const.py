@@ -36,6 +36,7 @@ STATE_ERROR = -1 # Kamera fehlt, kann kein Liveview etc.
 STATE_LIVE  = 0 # live-view, wartet auf knopf 'start'
 STATE_COUNT = 1 # countdown zahlt runter
 STATE_BILD  = 2 # bild wird angezeigt, warte auf bestaetigung/abbruch
+STATE_IDLE  = 3 # nichts machen
 
 '''
 Status der Speicher
