@@ -6,6 +6,7 @@ Created on 24.02.2020
 from ui import Ui_MainWindow as ui
 import const
 from cam import Camera
+from cam_thread import Threading
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -32,7 +33,7 @@ class Box(QObject):
         '''
         Constructor
         '''
-        super(Box, self).__init__()
+        QObject.__init__(self, parent)
         self.ui = ui()
         self.ui.setupUi(parent)
 
@@ -75,7 +76,6 @@ class Box(QObject):
         self.ui.btUsb.clicked.connect(self.slot_btUsb)
         self.ui.btConfig.clicked.connect(self.slot_btConfig)
 
-
         self.count_timer.timeout.connect(self.slot_countdown)
         self.bist_timer.timeout.connect(self.slot_bist)
 
@@ -83,7 +83,8 @@ class Box(QObject):
         parent.showFullScreen()
 
         self.cam = Camera()
-        self.cam.sig_live_view.connect(self.slot_preview)
+        self.thread = Threading(parent, self.cam)
+        self.thread.sig_live_view.connect(self.slot_preview)
 
         ''' start '''
         self.changeState(const.STATE_LIVE)
@@ -96,9 +97,6 @@ class Box(QObject):
         self.ui.bild.raise_()
         self.ui.video.raise_()
         self.ui.gui.raise_()
-
-        print("Resize")
-
 
     def initializeButton(self, button):
         '''
@@ -121,8 +119,8 @@ class Box(QObject):
             button.setText("")
             button.setIcon(QIcon(filename))
             # 10% vom Rand platz
-            button.setIconSize(QSize(button.width() * const.KNOB_ICON_FACTOR,
-                                     button.height() * const.KNOB_ICON_FACTOR))
+            button.setIconSize(QSize(int(button.width() * const.KNOB_ICON_FACTOR),
+                                     int(button.height() * const.KNOB_ICON_FACTOR)))
             button.show()
 
     def checkSdState(self):
@@ -138,8 +136,11 @@ class Box(QObject):
         - USB vorhanden
         - USB genug Platz
         '''
-        p = subprocess.Popen(['df','-l','--output=target,iavail'], stdout=subprocess.PIPE)
-        out, err = p.communicate()
+        try:
+            p = subprocess.Popen(['df','-l','--output=target,iavail'], stdout=subprocess.PIPE)
+            out, err = p.communicate()
+        except:
+            out = b'/media/pi/ 500000000'
 
         self.usb_dir = False
         for line in out.splitlines():
@@ -214,7 +215,7 @@ class Box(QObject):
             self.ui.video.show()
             self.setButtonImg(self.ui.btUntenRechts, const.IMG_CAM)
             self.ui.btConfig.show()
-            self.cam.start_live()
+            self.thread.start_live()
 
         elif state == const.STATE_COUNT:
             '''
@@ -239,7 +240,7 @@ class Box(QObject):
         
     def showImage(self, image):
         image.scaled(self.ui.bild.width(), self.ui.bild.height(), Qt.KeepAspectRatioByExpanding)
-        self.ui.bild.setPixmap(picture)
+        self.ui.bild.setPixmap(image)
         self.ui.bild.setAlignment(Qt.AlignHCenter)
         self.ui.bild.setAlignment(Qt.AlignCenter)
         self.ui.bild.show()
@@ -315,13 +316,13 @@ class Box(QObject):
         '''
         Receiver-slot fuer Liveview (nur im RAM)
         '''
-        showImage(image)
+        self.showImage(image)
         
     def slot_image(self, image):
         '''
         Receiver-slot fuer Fotos
         '''
-        showImage(image)
+        self.showImage(image)
         
 
 if __name__ == "__main__":
