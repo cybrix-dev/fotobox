@@ -21,7 +21,7 @@ class Camera:
             # copy+paste: gphoto2/examples/preview-image.py
             gp.check_result(gp.use_python_logging())
 
-            self.cam = gp.check_result(gp.gpself.camera_new())
+            self.cam = gp.check_result(gp.gp_camera_new())
             gp.check_result(gp.gp_camera_init(self.cam))
 
             # required configuration will depend on camera type!
