@@ -56,7 +56,7 @@ class Box(QObject):
         # nur fuer state countdown
         self.count_timer = QTimer(parent)
         self.count_timer.setInterval(const.COUNTDOWN_START * 1000)
-
+        self.counter = 0
         '''
         nur als Abbbruch bei Bildern
         '''
@@ -85,6 +85,7 @@ class Box(QObject):
         self.cam = Camera()
         self.thread = Threading(parent, self.cam)
         self.thread.sig_live_view.connect(self.slot_preview)
+        self.thread.sig_photo.connect(self.slot_image)
 
         ''' start '''
         self.changeState(const.STATE_LIVE)
@@ -196,15 +197,13 @@ class Box(QObject):
         - nur anzeigen, was gebraucht wird
         - Status von SD/USB bleibt
         '''
-        self.ui.bild.hide()
-        self.ui.video.hide()
-
         self.ui.lblZahl.hide()
 
         self.ui.btAbbruch.hide()
         self.ui.btConfig.hide()
         self.ui.btUntenRechts.hide()
 
+        print("Change state: ", state)
         if state == const.STATE_LIVE:
             '''
             - Zeige Kameraknopf
@@ -223,24 +222,20 @@ class Box(QObject):
             - Zeige Label
             - Starte Countdown
             '''
+            print("Start countdown")
             self.counter = const.COUNTDOWN_START
             self.ui.lblZahl.setText(str(self.counter))
             self.ui.lblZahl.show()
             self.count_timer.start(1000)
 
         elif state == const.STATE_BILD:
-            self.count_timer.stop()
-            self.cam.capture_image()
             print("Bild runterladen + anzeigen")
-
-            self.setButtonImg(self.ui.btUntenRechts, const.IMG_OK)
-            self.ui.btAbbruch.show()
-
+            self.count_timer.stop()
+            self.thread.capture_image()
         self.state = state
         
     def showImage(self, image):
-        image.scaled(self.ui.bild.width(), self.ui.bild.height(), Qt.KeepAspectRatioByExpanding)
-        self.ui.bild.setPixmap(image)
+        self.ui.bild.setPixmap(image.scaled(self.ui.bild.width(), self.ui.bild.height(), Qt.KeepAspectRatioByExpanding))
         self.ui.bild.setAlignment(Qt.AlignHCenter)
         self.ui.bild.setAlignment(Qt.AlignCenter)
         self.ui.bild.show()
@@ -263,10 +258,10 @@ class Box(QObject):
         - Bild akzeptieren (Bild Checkbox)
         '''
         if self.state == const.STATE_LIVE:
-            # self.changeState(const.STATE_COUNT)
-            self.changeState(const.STATE_BILD)
+            self.changeState(const.STATE_COUNT)
+            #self.changeState(const.STATE_BILD)
         elif self.state == const.STATE_BILD:
-            print("Bild speichern")
+            self.cam.store_last()
             self.changeState(const.STATE_LIVE)
         else:
             print("Invalid state")
@@ -278,7 +273,7 @@ class Box(QObject):
         - Bild verwerfen (Bild loeschen)
         - zurueck zu Liveview
         '''
-        print("Bild loeschen")
+        self.cam.dismiss_last()
         self.changeState(const.STATE_LIVE)
 
     def slot_btSd(self):
@@ -303,14 +298,6 @@ class Box(QObject):
         - Konfiguration/Debug
         '''
         print("Config")
-        picture = self.cam.fetch_preview().scaled(self.ui.bild.width(),
-                                                  self.ui.bild.height(),
-                                                  Qt.KeepAspectRatioByExpanding)
-
-        self.ui.bild.setPixmap(picture)
-        self.ui.bild.setAlignment(Qt.AlignHCenter)
-        self.ui.bild.setAlignment(Qt.AlignCenter)
-        self.ui.bild.show()
 
     def slot_preview(self, image):
         '''
@@ -322,6 +309,9 @@ class Box(QObject):
         '''
         Receiver-slot fuer Fotos
         '''
+        self.setButtonImg(self.ui.btUntenRechts, const.IMG_OK)
+        self.ui.btAbbruch.show()
+
         self.showImage(image)
         
 

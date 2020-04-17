@@ -5,9 +5,10 @@ import logging
 try:
     import gphoto2 as gp
 except:
-    debug = 1
+    import time
+    debug = True
 else:
-    debug = 0
+    debug = False
 
 
 class Camera:
@@ -15,7 +16,8 @@ class Camera:
     def __init__(self):
         print('debug: ', debug)
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.WARNING)
-        if debug == 1:
+        self.last_image = False
+        if debug:
             self.index = 0
         else:
             # copy+paste: gphoto2/examples/preview-image.py
@@ -48,12 +50,20 @@ class Camera:
                 # set config
                 gp.check_result(gp.gp_camera_set_config(self.cam, config))
 
+    def prepare_pixmap(self,camera_file):
+        file_data = gp.check_result(gp.gp_file_get_data_and_size(camera_file))
+
+        result = QPixmap()
+        result.loadFromData(file_data)
+        return result
+
     def fetch_preview(self):
         '''
         Holt ein einzelnes Vorschaubild von der Kamera
         '''
-        if debug == 1:
+        if debug:
             self.index += 1
+            time.sleep(0.05)
             if (self.index % 2) == 0:
                 file = './icons/test1.jpg'
             else:
@@ -61,14 +71,34 @@ class Camera:
             return QPixmap(file)
         else:
             # capture preview image (not saved to camera memory card)
-            print('Capturing preview image')
-            camera_file = gp.check_result(gp.gp_camera_capture_preview(self.cam))
-            file_data = gp.check_result(gp.gp_file_get_data_and_size(camera_file))
-            # camera_file = self._cap.capture_preview()
-            # file_data = camera_file.get_data_and_size()
-            # return Image.open(io.BytesIO(file_data))
+            return self.prepare_pixmap( gp.check_result(gp.gp_camera_capture_preview(self.cam)))
 
-            # return QPixmap().loadFromData(io.BytesIO(file_data).getvalue())
+    def capture_image(self):
+        self.last_image = True
+        if debug:
+            return QPixmap('./icons/test3.jpg')
+        else:
+            self.file_path = self._cap.capture(gp.GP_CAPTURE_IMAGE)
+            camera_file = self._cap.file_get(file_path.folder, file_path.name,
+                                             gp.GP_FILE_TYPE_NORMAL)
+
+            file_data = camera_file.get_data_and_size()
             result = QPixmap()
             result.loadFromData(file_data)
             return result
+
+    def dismiss_last(self):
+        if self.last_image:
+            if debug:
+                print("Dismiss last image")
+            else:
+                ''''''
+            self.last_image = False
+
+    def store_last(self,path):
+        if self.last_image:
+            if debug:
+                print("Store last image on USB: ", path)
+            else:
+                ''''''
+            self.last_image = False

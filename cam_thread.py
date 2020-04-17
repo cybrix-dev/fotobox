@@ -41,13 +41,7 @@ class Threading(QThread):
             if state == const.STATE_LIVE:
                 self.sig_live_view.emit(self.cam.fetch_preview())
             elif state == const.STATE_BILD:
-                '''
-                file_path = self._cap.capture(gp.GP_CAPTURE_IMAGE)
-                camera_file = self._cap.file_get(file_path.folder, file_path.name,
-                                                 gp.GP_FILE_TYPE_NORMAL)
-                file_data = camera_file.get_data_and_size()
-                return Image.open(io.BytesIO(file_data))
-                '''
+                self.sig_photo.emit(self.cam.capture_image())
                 state = const.STATE_IDLE
             else:
                 self.msleep(100)
