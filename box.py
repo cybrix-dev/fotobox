@@ -235,16 +235,28 @@ class Box(QObject):
         self.state = state
         
     def showImage(self, image):
+        '''
+        Zeigt das Bild auf dem GUI. Genutzt für Foto + Liveview
+        :param image:
+        '''
         self.ui.bild.setPixmap(image.scaled(self.ui.bild.width(), self.ui.bild.height(), Qt.KeepAspectRatioByExpanding))
         self.ui.bild.setAlignment(Qt.AlignHCenter)
         self.ui.bild.setAlignment(Qt.AlignCenter)
         self.ui.bild.show()
 
     def slot_bist(self):
+        '''
+        Build-In-Selftest
+        Gestartet durch BIST-Timer
+        Startet den Timer wieder selbst
+        '''
         self.checkMemory()
         self.bist_timer.start(const.BIST_INTERVAL)
 
     def slot_countdown(self):
+        '''
+        Slot fuer Timer-Signal, zaehlt runter und startet Foto bei 0
+        '''
         self.counter -= 1
         if self.counter > 0:
             self.ui.lblZahl.setText(str(self.counter))
@@ -259,9 +271,8 @@ class Box(QObject):
         '''
         if self.state == const.STATE_LIVE:
             self.changeState(const.STATE_COUNT)
-            #self.changeState(const.STATE_BILD)
         elif self.state == const.STATE_BILD:
-            self.cam.store_last()
+            self.cam.store_last(self.usb_dir)
             self.changeState(const.STATE_LIVE)
         else:
             print("Invalid state")
@@ -297,7 +308,7 @@ class Box(QObject):
         Knopf:
         - Konfiguration/Debug
         '''
-        print("Config")
+        self.changeState(const.STATE_BILD)
 
     def slot_preview(self, image):
         '''

@@ -39,11 +39,15 @@ class Threading(QThread):
                 state = self.cmd_fifo.get()
 
             if state == const.STATE_LIVE:
+                # kontinuierlich livebild abholen und an GUI senden
                 self.sig_live_view.emit(self.cam.fetch_preview())
             elif state == const.STATE_BILD:
+                # einmal Foto machen und an GUI senden
+                # danach warten bis weiter
                 self.sig_photo.emit(self.cam.capture_image())
                 state = const.STATE_IDLE
             else:
+                # nichts machen, um CPU zu schonen, Pause
                 self.msleep(100)
 
 
