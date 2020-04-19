@@ -102,3 +102,15 @@ class Camera:
             else:
                 ''''''
             self.last_image = False
+
+    def get_available_space(self):
+        if debug:
+            return 50000000
+        else:
+            arr = gp.check_result(gp.gp_camera_get_storageinfo(self.cam))
+            return arr[0].freekbytes * 1024
+            
+        
+if __name__ == "__main__":
+    cam = Camera()
+    print(cam.get_available_space())
