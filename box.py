@@ -129,8 +129,14 @@ class Box(QObject):
         - SD vorhanden
         - SD genug Platz
         '''
-        print("Todo: check SD-Card")
-        return const.MEMSTATE_OK
+        sd_space = self.cam.get_available_space()
+        if sd_space < 0:
+            result = const.MEMSTATE_MISSING
+            return const.MEMSTATE_MISSING
+        elif sd_space < const.CRITICAL_SPACE:
+            return const.MEMSTATE_FULL
+        else:
+            return const.MEMSTATE_OK
 
     def checkUsbState(self):
         '''
@@ -152,7 +158,7 @@ class Box(QObject):
 
         if not self.usb_dir:
             return const.MEMSTATE_MISSING
-        elif int(availableSpace) < 50000:
+        elif int(availableSpace) < const.CRITICAL_SPACE:
             return const.MEMSTATE_FULL
         else:
             return const.MEMSTATE_OK
