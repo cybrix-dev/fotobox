@@ -78,9 +78,11 @@ class Camera:
         if debug:
             return QPixmap('./icons/test3.jpg')
         else:
-            self.file_path = self._cap.capture(gp.GP_CAPTURE_IMAGE)
-            camera_file = self._cap.file_get(file_path.folder, file_path.name,
-                                             gp.GP_FILE_TYPE_NORMAL)
+            self.file_path = gp.check_result(gp.gp_camera_capture(self.cam, gp.GP_CAPTURE_IMAGE))
+            camera_file = gp.check_result(gp.gp_camera_file_get(self.cam,
+                                                self.file_path.folder,
+                                                self.file_path.name,
+                                                gp.GP_FILE_TYPE_NORMAL))
 
             file_data = camera_file.get_data_and_size()
             result = QPixmap()
@@ -100,15 +102,23 @@ class Camera:
             if debug:
                 print("Store last image on USB: ", path)
             else:
-                ''''''
+                '''
+                
+                '''
             self.last_image = False
 
     def get_available_space(self):
         if debug:
             return 50000000
         else:
+            result = -1
             arr = gp.check_result(gp.gp_camera_get_storageinfo(self.cam))
-            return arr[0].freekbytes * 1024
+            for mem in arr:
+                if mem.description == "SD":
+                    result = mem.freekbytes
+                    break
+                
+            return result
             
         
 if __name__ == "__main__":
