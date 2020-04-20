@@ -239,7 +239,10 @@ class Box(QObject):
         Zeigt das Bild auf dem GUI. Genutzt für Foto + Liveview
         :param image:
         '''
-        self.ui.bild.setPixmap(image.scaled(self.ui.bild.width(), self.ui.bild.height(), Qt.KeepAspectRatioByExpanding))
+        self.ui.bild.setPixmap(image.scaled(
+            self.ui.bild.width(),
+            self.ui.bild.height(),
+            Qt.KeepAspectRatioByExpanding))
         self.ui.bild.setAlignment(Qt.AlignHCenter)
         self.ui.bild.setAlignment(Qt.AlignCenter)
         self.ui.bild.show()
