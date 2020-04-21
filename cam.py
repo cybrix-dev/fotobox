@@ -95,6 +95,10 @@ class Camera:
                 print("Dismiss last image")
             else:
                 ''''''
+                gp.check_result(gp.gp_camera_file_delete(self.cam,
+                                        self.file_path.folder,
+                                        self.file_path.name,
+                                        gp.GP_FILE_TYPE_NORMAL))
             self.last_image = False
 
     def store_last(self,path):
@@ -105,6 +109,7 @@ class Camera:
                 '''
                 
                 '''
+                
             self.last_image = False
 
     def get_available_space(self):
