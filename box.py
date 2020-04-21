@@ -64,9 +64,6 @@ class Box(QObject):
         self.setButtonImg(self.ui.btAbbruch, const.IMG_ABORT)
         self.ui.btAbbruch.hide()
 
-        print("test environment")
-        self.checkMemory()
-
         '''
         Signal/Slot-Verbindungen
         '''
@@ -86,6 +83,9 @@ class Box(QObject):
         self.thread = Threading(parent, self.cam)
         self.thread.sig_live_view.connect(self.slot_preview)
         self.thread.sig_photo.connect(self.slot_image)
+
+        print("test environment")
+        self.checkMemory()
 
         ''' start '''
         self.changeState(const.STATE_LIVE)
