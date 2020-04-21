@@ -46,6 +46,8 @@ MEMSTATE_OK = 0
 MEMSTATE_FULL = 1
 MEMSTATE_MISSING = 2
 
+CRITICAL_SPACE = 50000 # Schwelle in KB ab wann Speicher als voll markiert wird
+
 '''
 Timerwerte
 '''
