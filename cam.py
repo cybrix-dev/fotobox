@@ -109,7 +109,7 @@ class Camera:
 
     def get_available_space(self):
         if debug:
-            return 50000000
+            return 50000
         else:
             result = -1
             arr = gp.check_result(gp.gp_camera_get_storageinfo(self.cam))
