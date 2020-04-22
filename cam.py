@@ -83,7 +83,7 @@ class Camera:
     def capture_image(self):
         self.last_image = True
         if debug:
-            return QPixmap('./icons/test3.jpg')
+            return io.FileIO('./icons/test3.jpg').read()
         else:
             self.file_path = gp.check_result(gp.gp_camera_capture(self.cam, gp.GP_CAPTURE_IMAGE))
             print( self.file_path.folder, self.file_path.name )
@@ -108,16 +108,16 @@ class Camera:
     def store_last(self,dest):
         if self.last_image:
             if debug:
-                print("Store last image on USB: ", path)
+                print("Store last image on USB: ", dest)
             else:
                 '''
                 
                 '''
-            camera_file = gp.check_result(gp.gp_camera_file_get(self.cam,
-                                                self.file_path.folder,
-                                                self.file_path.name,
-                                                gp.GP_FILE_TYPE_NORMAL))
-            gp.check_result(gp.gp_file_save( camera_file, dest ))
+                camera_file = gp.check_result(gp.gp_camera_file_get(self.cam,
+                                                    self.file_path.folder,
+                                                    self.file_path.name,
+                                                    gp.GP_FILE_TYPE_NORMAL))
+                gp.check_result(gp.gp_file_save( camera_file, dest ))
             self.last_image = False
 
     def get_available_space(self):

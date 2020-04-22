@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import subprocess
+import io
 
 
 class MainWindowB(QMainWindow):
@@ -43,15 +44,13 @@ class Box(QObject):
         self.initializeButton(self.ui.btAbbruch)
         self.initializeButton(self.ui.btUntenRechts)
 
+        self.preview = QPixmap()
         self.sdState = const.MEMSTATE_INIT
         self.usbState = const.MEMSTATE_INIT
 
         '''
         Timer initialisieren
         '''
-        # wird in status live getriggert
-        self.bist_timer = QTimer(parent)
-        self.bist_timer.setInterval(const.BIST_INTERVAL)
 
         # nur fuer state countdown
         self.count_timer = QTimer(parent)
@@ -74,7 +73,6 @@ class Box(QObject):
         self.ui.btConfig.clicked.connect(self.slot_btConfig)
 
         self.count_timer.timeout.connect(self.slot_countdown)
-        self.bist_timer.timeout.connect(self.slot_bist)
 
         parent.sigResize.connect(self.updateGui)
         parent.showFullScreen()
@@ -245,22 +243,14 @@ class Box(QObject):
         Zeigt das Bild auf dem GUI. Genutzt für Foto + Liveview
         :param image:
         '''
-        self.ui.bild.setPixmap(image.scaled(
+        self.preview.loadFromData(image)
+        self.ui.bild.setPixmap(self.preview.scaled(
             self.ui.bild.width(),
             self.ui.bild.height(),
             Qt.KeepAspectRatioByExpanding))
         self.ui.bild.setAlignment(Qt.AlignHCenter)
         self.ui.bild.setAlignment(Qt.AlignCenter)
         self.ui.bild.show()
-
-    def slot_bist(self):
-        '''
-        Build-In-Selftest
-        Gestartet durch BIST-Timer
-        Startet den Timer wieder selbst
-        '''
-        self.checkMemory()
-        self.bist_timer.start(const.BIST_INTERVAL)
 
     def slot_countdown(self):
         '''
@@ -283,6 +273,7 @@ class Box(QObject):
         elif self.state == const.STATE_BILD:
             self.cam.store_last(self.usb_dir)
             self.changeState(const.STATE_LIVE)
+            self.checkMemory()
         else:
             print("Invalid state")
             self.changeState(const.STATE_LIVE)
