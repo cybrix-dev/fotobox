@@ -113,11 +113,15 @@ class Camera:
                 '''
                 
                 '''
-                camera_file = gp.check_result(gp.gp_camera_file_get(self.cam,
-                                                    self.file_path.folder,
-                                                    self.file_path.name,
-                                                    gp.GP_FILE_TYPE_NORMAL))
-                gp.check_result(gp.gp_file_save( camera_file, dest ))
+                if dest == False:
+                    print( "no USB available" )
+                    # the image is already stored on the card
+                else:
+                    camera_file = gp.check_result(gp.gp_camera_file_get(self.cam,
+                                                        self.file_path.folder,
+                                                        self.file_path.name,
+                                                        gp.GP_FILE_TYPE_NORMAL))
+                    gp.check_result(gp.gp_file_save( camera_file, dest ))
             self.last_image = False
 
     def get_available_space(self):

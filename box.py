@@ -12,8 +12,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import subprocess
-import io
-
+import os
+import time
 
 class MainWindowB(QMainWindow):
 
@@ -83,6 +83,10 @@ class Box(QObject):
         self.thread.sig_photo.connect(self.slot_image)
 
         print("test environment")
+        self.usbState = const.MEMSTATE_MISSING
+        self.sdState = const.MEMSTATE_MISSING
+        self.usbDestPath = "/fotobox"
+        self.usbOutputPath = ""
         self.checkMemory()
 
         ''' start '''
@@ -145,12 +149,13 @@ class Box(QObject):
             p = subprocess.Popen(['df','-l','--output=target,iavail'], stdout=subprocess.PIPE)
             out, err = p.communicate()
         except:
-            out = b'/media/pi/ 500000000'
+            out = "/media/pi/ 500000000"
 
         self.usb_dir = False
         for line in out.splitlines():
-            if b'/media/pi/' in line:
+            if b"/media/pi/" in line:
                 self.usb_dir, availableSpace = line.split()
+                self.usb_dir = self.usb_dir.decode()
                 print(self.usb_dir)
                 print(availableSpace)
 
@@ -171,6 +176,14 @@ class Box(QObject):
         '''
         usbState = self.checkUsbState()
         if usbState != self.usbState:
+            if self.usbState == const.MEMSTATE_MISSING:
+                # create a new directory
+                self.usbOutputPath = self.usb_dir + self.usbDestPath
+                try:
+                    os.makedirs(self.usbOutputPath)
+                except:
+                    print("Pfad %s konnte nicht erstellt werden.", self.usbOutputPath)
+            
             if usbState == const.MEMSTATE_OK:
                 img = False
             elif usbState == const.MEMSTATE_FULL:
@@ -271,7 +284,9 @@ class Box(QObject):
         if self.state == const.STATE_LIVE:
             self.changeState(const.STATE_COUNT)
         elif self.state == const.STATE_BILD:
-            self.cam.store_last(self.usb_dir)
+            filename = self.usbOutputPath + "/" + time.strftime("%Y-%m-%d_%H-%M-%S")
+            print(filename)
+            self.cam.store_last(filename)
             self.changeState(const.STATE_LIVE)
             self.checkMemory()
         else:
