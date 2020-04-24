@@ -51,6 +51,9 @@ class Box(QObject):
         '''
         Timer initialisieren
         '''
+        # fuer slot_bist
+        self.timer_bist = QTimer(parent)
+        self.timer_bist.setInterval(const.BIST_INTERVAL)
 
         # nur fuer state countdown
         self.count_timer = QTimer(parent)
@@ -73,6 +76,7 @@ class Box(QObject):
         self.ui.btConfig.clicked.connect(self.slot_btConfig)
 
         self.count_timer.timeout.connect(self.slot_countdown)
+        self.timer_bist.timeout.connect(self.slot_bist)
 
         parent.sigResize.connect(self.updateGui)
         parent.showFullScreen()
@@ -82,15 +86,13 @@ class Box(QObject):
         self.thread.sig_live_view.connect(self.slot_preview)
         self.thread.sig_photo.connect(self.slot_image)
 
-        print("test environment")
-        self.usbState = const.MEMSTATE_MISSING
-        self.sdState = const.MEMSTATE_MISSING
+        ''' start '''
+        self.changeState(const.STATE_LIVE)
+
         self.usbDestPath = "/fotobox"
         self.usbOutputPath = ""
         self.checkMemory()
 
-        ''' start '''
-        self.changeState(const.STATE_LIVE)
 
     def updateGui(self):
         self.ui.gui.setGeometry(self.ui.centralwidget.geometry())
@@ -156,8 +158,6 @@ class Box(QObject):
             if b"/media/pi/" in line:
                 self.usb_dir, availableSpace = line.split()
                 self.usb_dir = self.usb_dir.decode()
-                print(self.usb_dir)
-                print(availableSpace)
 
         if not self.usb_dir:
             return const.MEMSTATE_MISSING
@@ -176,13 +176,17 @@ class Box(QObject):
         '''
         usbState = self.checkUsbState()
         if usbState != self.usbState:
-            if self.usbState == const.MEMSTATE_MISSING:
-                # create a new directory
-                self.usbOutputPath = self.usb_dir + self.usbDestPath
-                try:
-                    os.makedirs(self.usbOutputPath)
-                except:
-                    print("Pfad %s konnte nicht erstellt werden.", self.usbOutputPath)
+            
+            # create the directory if new USB-memory detected
+            if usbState != const.MEMSTATE_MISSING:
+                if (self.usbState == const.MEMSTATE_MISSING
+                        or self.usbState == const.MEMSTATE_INIT):
+                    # create a new directory
+                    self.usbOutputPath = self.usb_dir + self.usbDestPath
+                    try:
+                        os.makedirs(self.usbOutputPath)
+                    except:
+                        print("Pfad %s konnte nicht erstellt werden.", self.usbOutputPath)
             
             if usbState == const.MEMSTATE_OK:
                 img = False
@@ -220,18 +224,16 @@ class Box(QObject):
         self.ui.btConfig.hide()
         self.ui.btUntenRechts.hide()
 
-        print("Change state: ", state)
         if state == const.STATE_LIVE:
             '''
             - Zeige Kameraknopf
             - kein Countdown
             - kein Abbruchknopf
             '''
-            print("Stream video")
-            self.ui.video.show()
             self.setButtonImg(self.ui.btUntenRechts, const.IMG_CAM)
             self.ui.btConfig.show()
             self.thread.start_live()
+            self.timer_bist.start()
 
         elif state == const.STATE_COUNT:
             '''
@@ -239,14 +241,13 @@ class Box(QObject):
             - Zeige Label
             - Starte Countdown
             '''
-            print("Start countdown")
             self.counter = const.COUNTDOWN_START
             self.ui.lblZahl.setText(str(self.counter))
             self.ui.lblZahl.show()
             self.count_timer.start(1000)
+            self.timer_bist.stop()
 
         elif state == const.STATE_BILD:
-            print("Bild runterladen + anzeigen")
             self.count_timer.stop()
             self.thread.capture_image()
         self.state = state
@@ -284,9 +285,12 @@ class Box(QObject):
         if self.state == const.STATE_LIVE:
             self.changeState(const.STATE_COUNT)
         elif self.state == const.STATE_BILD:
-            filename = self.usbOutputPath + "/" + time.strftime("%Y-%m-%d_%H-%M-%S")
-            print(filename)
-            self.cam.store_last(filename)
+            if not self.usb_dir:
+                print("USB nicht verfuegbar")
+            else:
+                filename = self.usbOutputPath + "/" + time.strftime("%Y-%m-%d_%H-%M-%S")
+                self.cam.store_last(filename)
+                
             self.changeState(const.STATE_LIVE)
             self.checkMemory()
         else:
@@ -308,7 +312,6 @@ class Box(QObject):
         - Warnung/Fehler ignorieren: SD-Karte
         '''
         self.ui.btSd.hide()
-        print("SD-Status")
 
     def slot_btUsb(self):
         '''
@@ -316,7 +319,6 @@ class Box(QObject):
         - Warnung/Fehler ignorieren: USB-Stick
         '''
         self.ui.btUsb.hide()
-        print("USB-Status")
 
     def slot_btConfig(self):
         '''
@@ -340,7 +342,9 @@ class Box(QObject):
 
         self.showImage(image)
         
-
+    def slot_bist(self):
+        self.checkMemory()
+        
 if __name__ == "__main__":
     import sys
     app = QApplication(sys.argv)

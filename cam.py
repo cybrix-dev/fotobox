@@ -15,9 +15,11 @@ else:
 class Camera:
 
     def __init__(self):
-        print('debug: ', debug)
+        if debug:
+            print('debug')
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.WARNING)
         self.last_image = False
+        self.available_space = 50000
         if debug:
             self.index = 0
         else:
@@ -28,7 +30,6 @@ class Camera:
             gp.check_result(gp.gp_camera_init(self.cam))
 
             # required configuration will depend on camera type!
-            print('Checking camera config')
             # get configuration tree
             config = gp.check_result(gp.gp_camera_get_config(self.cam))
             
@@ -60,6 +61,8 @@ class Camera:
                 gp.check_result(gp.gp_widget_set_value(capture_target_class, value))
                 # set config
                 gp.check_result(gp.gp_camera_set_config(self.cam, config))
+                
+            self.get_available_space_int()
 
     def prepare_pixmap(self,camera_file):
         return gp.check_result(gp.gp_file_get_data_and_size(camera_file))
@@ -85,21 +88,22 @@ class Camera:
         if debug:
             return io.FileIO('./icons/test3.jpg').read()
         else:
-            self.file_path = gp.check_result(gp.gp_camera_capture(self.cam, gp.GP_CAPTURE_IMAGE))
-            print( self.file_path.folder, self.file_path.name )
-            camera_file = gp.check_result(gp.gp_camera_file_get(self.cam,
-                                                self.file_path.folder,
-                                                self.file_path.name,
-                                                gp.GP_FILE_TYPE_NORMAL))
+            try:
+                self.file_path = gp.check_result(gp.gp_camera_capture(self.cam, gp.GP_CAPTURE_IMAGE))
+                camera_file = gp.check_result(gp.gp_camera_file_get(self.cam,
+                                                    self.file_path.folder,
+                                                    self.file_path.name,
+                                                    gp.GP_FILE_TYPE_NORMAL))
 
-            return camera_file.get_data_and_size()
+                return camera_file.get_data_and_size()
+            except:
+                return self.fetch_preview()
 
     def dismiss_last(self):
         if self.last_image:
             if debug:
                 print("Dismiss last image")
             else:
-                ''''''
                 gp.check_result(gp.gp_camera_file_delete(self.cam,
                                         self.file_path.folder,
                                         self.file_path.name))
@@ -110,23 +114,16 @@ class Camera:
             if debug:
                 print("Store last image on USB: ", dest)
             else:
-                '''
-                
-                '''
-                if dest == False:
-                    print( "no USB available" )
-                    # the image is already stored on the card
-                else:
-                    camera_file = gp.check_result(gp.gp_camera_file_get(self.cam,
-                                                        self.file_path.folder,
-                                                        self.file_path.name,
-                                                        gp.GP_FILE_TYPE_NORMAL))
-                    gp.check_result(gp.gp_file_save( camera_file, dest ))
+                camera_file = gp.check_result(gp.gp_camera_file_get(self.cam,
+                                                    self.file_path.folder,
+                                                    self.file_path.name,
+                                                    gp.GP_FILE_TYPE_NORMAL))
+                gp.check_result(gp.gp_file_save( camera_file, dest ))
             self.last_image = False
 
-    def get_available_space(self):
+    def get_available_space_int(self):
         if debug:
-            return 50000
+            result = 50000
         else:
             result = -1
             arr = gp.check_result(gp.gp_camera_get_storageinfo(self.cam))
@@ -135,7 +132,10 @@ class Camera:
                     result = mem.freekbytes
                     break
                 
-            return result
+        self.available_space = result
+        
+    def get_available_space(self):
+        return self.available_space
             
         
 if __name__ == "__main__":
