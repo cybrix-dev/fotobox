@@ -1,16 +1,15 @@
 '''
-Created on 24.02.2020
-
-@author: t.starke
+Contains the complete GUI-handling.
 '''
-from ui import Ui_MainWindow as ui
 import const
-from cam import Camera
+from ui import Ui_MainWindow as ui
 from cam_thread import Threading
+from config import Config
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+
 import subprocess
 import os
 import time
@@ -35,6 +34,8 @@ class Box(QObject):
         Constructor
         '''
         QObject.__init__(self, parent)
+
+        self.config = Config()
         self.ui = ui()
         self.ui.setupUi(parent)
 
@@ -43,6 +44,13 @@ class Box(QObject):
         self.initializeButton(self.ui.btConfig)
         self.initializeButton(self.ui.btAbbruch)
         self.initializeButton(self.ui.btUntenRechts)
+
+        # only show config-button if no configuration
+        # TODO: or if the -config-parameter was used
+        if self.config.config_available:
+            self.ui.btConfig.hide()
+        else:
+            self.ui.btConfig.hide()
 
         self.preview = QPixmap()
         self.sdState = const.MEMSTATE_INIT
@@ -81,15 +89,14 @@ class Box(QObject):
         parent.sigResize.connect(self.updateGui)
         parent.showFullScreen()
 
-        self.cam = Camera()
-        self.thread = Threading(parent, self.cam)
+        self.thread = Threading(parent)
         self.thread.sig_live_view.connect(self.slot_preview)
         self.thread.sig_photo.connect(self.slot_image)
 
         ''' start '''
         self.changeState(const.STATE_LIVE)
 
-        self.usbDestPath = "/fotobox"
+        self.usbDestPath = self.config.usb_path
         self.usbOutputPath = ""
         self.checkMemory()
 
@@ -97,10 +104,8 @@ class Box(QObject):
     def updateGui(self):
         self.ui.gui.setGeometry(self.ui.centralwidget.geometry())
         self.ui.bild.setGeometry(self.ui.centralwidget.geometry())
-        self.ui.video.setGeometry(self.ui.centralwidget.geometry())
 
         self.ui.bild.raise_()
-        self.ui.video.raise_()
         self.ui.gui.raise_()
 
     def initializeButton(self, button):
@@ -108,8 +113,8 @@ class Box(QObject):
         Resizing
         '''
         size = button.size()
-        size.setWidth(size.width() * const.KNOB_RESIZE_FACTOR)
-        size.setHeight(size.height() * const.KNOB_RESIZE_FACTOR)
+        size.setWidth(size.width() * self.config.knob_resize_factor)
+        size.setHeight(size.height() * self.config.knob_resize_factor)
         button.setFixedSize(size)
 
     def setButtonImg(self, button, filename):
@@ -124,8 +129,8 @@ class Box(QObject):
             button.setText("")
             button.setIcon(QIcon(filename))
             # 10% vom Rand platz
-            button.setIconSize(QSize(int(button.width() * const.KNOB_ICON_FACTOR),
-                                     int(button.height() * const.KNOB_ICON_FACTOR)))
+            button.setIconSize(QSize(int(button.width() * self.config.knob_icon_factor),
+                                     int(button.height() * self.config.knob_icon_factor)))
             button.show()
 
     def checkSdState(self):
@@ -133,11 +138,11 @@ class Box(QObject):
         - SD vorhanden
         - SD genug Platz
         '''
-        sd_space = self.cam.get_available_space()
+        sd_space = self.thread.get_available_space()
         if sd_space < 0:
             result = const.MEMSTATE_MISSING
             return const.MEMSTATE_MISSING
-        elif sd_space < const.CRITICAL_SPACE:
+        elif sd_space < self.config.critical_space:
             return const.MEMSTATE_FULL
         else:
             return const.MEMSTATE_OK
@@ -151,7 +156,7 @@ class Box(QObject):
             p = subprocess.Popen(['df','-l','--output=target,iavail'], stdout=subprocess.PIPE)
             out, err = p.communicate()
         except:
-            out = "/media/pi/ 500000000"
+            out = b"/media/pi/ 500000000"
 
         self.usb_dir = False
         for line in out.splitlines():
@@ -161,7 +166,7 @@ class Box(QObject):
 
         if not self.usb_dir:
             return const.MEMSTATE_MISSING
-        elif int(availableSpace) < const.CRITICAL_SPACE:
+        elif int(availableSpace) < self.config.critical_space:
             return const.MEMSTATE_FULL
         else:
             return const.MEMSTATE_OK
@@ -186,7 +191,7 @@ class Box(QObject):
                     try:
                         os.makedirs(self.usbOutputPath)
                     except:
-                        print("Pfad %s konnte nicht erstellt werden.", self.usbOutputPath)
+                        print("Path %s could not be created.", self.usbOutputPath)
             
             if usbState == const.MEMSTATE_OK:
                 img = False
@@ -288,8 +293,8 @@ class Box(QObject):
             if not self.usb_dir:
                 print("USB nicht verfuegbar")
             else:
-                filename = self.usbOutputPath + "/" + time.strftime("%Y-%m-%d_%H-%M-%S")
-                self.cam.store_last(filename)
+                filename = self.usbOutputPath + "/" + time.strftime(self.config.usb_file_string)
+                self.thread.store_last(filename)
                 
             self.changeState(const.STATE_LIVE)
             self.checkMemory()
@@ -303,7 +308,7 @@ class Box(QObject):
         - Bild verwerfen (Bild loeschen)
         - zurueck zu Liveview
         '''
-        self.cam.dismiss_last()
+        self.thread.dismiss_last()
         self.changeState(const.STATE_LIVE)
 
     def slot_btSd(self):

@@ -7,6 +7,8 @@ try:
 except:
     import time
     import io
+    import const
+
     debug = True
 else:
     debug = False
@@ -19,7 +21,6 @@ class Camera:
             print('debug')
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.WARNING)
         self.last_image = False
-        self.available_space = 50000
         if debug:
             self.index = 0
         else:
@@ -61,8 +62,6 @@ class Camera:
                 gp.check_result(gp.gp_widget_set_value(capture_target_class, value))
                 # set config
                 gp.check_result(gp.gp_camera_set_config(self.cam, config))
-                
-            self.get_available_space_int()
 
     def prepare_pixmap(self,camera_file):
         return gp.check_result(gp.gp_file_get_data_and_size(camera_file))
@@ -75,9 +74,9 @@ class Camera:
             self.index += 1
             time.sleep(0.05)
             if (self.index % 2) == 0:
-                file = './icons/test1.jpg'
+                file = const.IMG_PATH + '/test1.jpg'
             else:
-                file = './icons/test2.jpg'
+                file = const.IMG_PATH + '/test2.jpg'
             return io.FileIO(file).read()
         else:
             # capture preview image (not saved to camera memory card)
@@ -86,7 +85,7 @@ class Camera:
     def capture_image(self):
         self.last_image = True
         if debug:
-            return io.FileIO('./icons/test3.jpg').read()
+            return io.FileIO(const.IMG_PATH + '/test3.jpg').read()
         else:
             try:
                 self.file_path = gp.check_result(gp.gp_camera_capture(self.cam, gp.GP_CAPTURE_IMAGE))
@@ -121,7 +120,7 @@ class Camera:
                 gp.check_result(gp.gp_file_save( camera_file, dest ))
             self.last_image = False
 
-    def get_available_space_int(self):
+    def get_available_space(self):
         if debug:
             result = 50000
         else:
@@ -132,11 +131,8 @@ class Camera:
                     result = mem.freekbytes
                     break
                 
-        self.available_space = result
-        
-    def get_available_space(self):
-        return self.available_space
-            
+        return result
+
         
 if __name__ == "__main__":
     cam = Camera()

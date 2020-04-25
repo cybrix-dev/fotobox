@@ -3,11 +3,17 @@ Created on 24.02.2020
 
 @author: t.starke
 '''
+import os
+
 
 '''
 Bilder/Icons
 '''
-IMG_PATH  = "./icons"
+BASE_PATH = os.path.dirname(__file__)
+IMG_PATH  = BASE_PATH + "/icons"
+
+print("icon-path: ", IMG_PATH)
+
 IMG_ABORT = IMG_PATH + "/abort_trash.png"
 IMG_WARN  = IMG_PATH + "/attention.png"
 IMG_ERR   = IMG_PATH + "/attention.png"
@@ -22,12 +28,6 @@ IMG_USB         = IMG_PATH + "/usb_stick.png"
 IMG_USB_FULL    = IMG_PATH + "/usb_warning.png"
 IMG_USB_MISSING = IMG_PATH + "/usb_missing.png"
 
-
-'''
-GUI Elemente
-'''
-KNOB_RESIZE_FACTOR = 1
-KNOB_ICON_FACTOR = 0.75
 
 '''
 Status der Applikation
@@ -45,11 +45,3 @@ MEMSTATE_INIT = -1
 MEMSTATE_OK = 0
 MEMSTATE_FULL = 1
 MEMSTATE_MISSING = 2
-
-CRITICAL_SPACE = 50000 # Schwelle in KB ab wann Speicher als voll markiert wird
-
-'''
-Timerwerte
-'''
-COUNTDOWN_START = 3 # Sekunden
-BIST_INTERVAL = 5000 # Millisekunden
