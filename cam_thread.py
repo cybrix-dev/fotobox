@@ -45,6 +45,7 @@ class Threading(QThread):
                 # einmal Foto machen und an GUI senden
                 # danach warten bis weiter
                 self.sig_photo.emit(self.cam.capture_image())
+                self.cam.get_available_space_int()
                 state = const.STATE_IDLE
             else:
                 # nichts machen, um CPU zu schonen, Pause

@@ -51,5 +51,5 @@ CRITICAL_SPACE = 50000 # Schwelle in KB ab wann Speicher als voll markiert wird
 '''
 Timerwerte
 '''
-COUNTDOWN_START = 5 # Sekunden
+COUNTDOWN_START = 3 # Sekunden
 BIST_INTERVAL = 5000 # Millisekunden
