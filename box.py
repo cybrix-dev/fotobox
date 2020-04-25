@@ -61,11 +61,11 @@ class Box(QObject):
         '''
         # fuer slot_bist
         self.timer_bist = QTimer(parent)
-        self.timer_bist.setInterval(const.BIST_INTERVAL)
+        self.timer_bist.setInterval(self.config.bist_interval)
 
         # nur fuer state countdown
         self.count_timer = QTimer(parent)
-        self.count_timer.setInterval(const.COUNTDOWN_START * 1000)
+        self.count_timer.setInterval(1000)
         self.counter = 0
         '''
         nur als Abbbruch bei Bildern
@@ -246,7 +246,7 @@ class Box(QObject):
             - Zeige Label
             - Starte Countdown
             '''
-            self.counter = const.COUNTDOWN_START
+            self.counter = self.config.countdown
             self.ui.lblZahl.setText(str(self.counter))
             self.ui.lblZahl.show()
             self.count_timer.start(1000)
@@ -266,7 +266,7 @@ class Box(QObject):
         self.ui.bild.setPixmap(self.preview.scaled(
             self.ui.bild.width(),
             self.ui.bild.height(),
-            Qt.KeepAspectRatioByExpanding))
+            self.config.image_resize_type))
         self.ui.bild.setAlignment(Qt.AlignHCenter)
         self.ui.bild.setAlignment(Qt.AlignCenter)
         self.ui.bild.show()
