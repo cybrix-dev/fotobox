@@ -21,8 +21,8 @@ class Threading(QThread):
     sig_live_view = pyqtSignal(object)
     sig_photo = pyqtSignal(object)
 
-    def __init__(self,parent):
-        QThread.__init__(self,parent)
+    def __init__(self, parent):
+        QThread.__init__(self, parent)
         self.cam = Camera()
         self.cmd_fifo = queue.Queue()
         self.available_space = self.cam.get_available_space()

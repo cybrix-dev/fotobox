@@ -16,11 +16,12 @@ else:
 
 class Camera:
 
-    def __init__(self):
+    def __init__(self, memory_type=None):
         if debug:
             print('debug')
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.WARNING)
         self.last_image = False
+        self.memory_type = memory_type
         if debug:
             self.index = 0
         else:
@@ -54,7 +55,7 @@ class Camera:
                 # set config
                 gp.check_result(gp.gp_camera_set_config(self.cam, config))
                 
-            # set storage folder+file
+            # set storage folder+file - TODO: depending on memory_type
             OK, capture_target_class = gp.gp_widget_get_child_by_name( config, 'capturetarget')
             if OK >= gp.GP_OK:
                 # set value
@@ -62,6 +63,10 @@ class Camera:
                 gp.check_result(gp.gp_widget_set_value(capture_target_class, value))
                 # set config
                 gp.check_result(gp.gp_camera_set_config(self.cam, config))
+
+    def set_memory_type(self, memory_type):
+        # TODO: update destination-memory
+        self.memory_type = memory_type
 
     def prepare_pixmap(self,camera_file):
         return gp.check_result(gp.gp_file_get_data_and_size(camera_file))
@@ -127,7 +132,7 @@ class Camera:
             result = -1
             arr = gp.check_result(gp.gp_camera_get_storageinfo(self.cam))
             for mem in arr:
-                if mem.description == "SD":
+                if mem.description == self.memory_type:
                     result = mem.freekbytes
                     break
                 

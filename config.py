@@ -15,6 +15,8 @@ class Config:
         self.countdown = 3  # countdown-timer in s - 3s
         self.bist_interval = 5000  # memcheck interval in ms - 5s
 
-        self.usb_path = "/photobox"
+        self.usb_root = b"/media/pi"
+        self.usb_path = "photobox"
         self.usb_file_string = "%Y-%m-%d_%H-%M-%S.jpg"
+        self.camera_memory = "SD"
 

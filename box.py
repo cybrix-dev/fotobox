@@ -47,10 +47,7 @@ class Box(QObject):
 
         # only show config-button if no configuration
         # TODO: or if the -config-parameter was used
-        if self.config.config_available:
-            self.ui.btConfig.hide()
-        else:
-            self.ui.btConfig.hide()
+        self.show_config = not self.config.config_available
 
         self.preview = QPixmap()
         self.sdState = const.MEMSTATE_INIT
@@ -89,16 +86,19 @@ class Box(QObject):
         parent.sigResize.connect(self.updateGui)
         parent.showFullScreen()
 
+        # setup camera + camera-thread
         self.thread = Threading(parent)
+        # careful not to do anything after the thread was started
+        self.thread.cam.set_memory_type(self.config.camera_memory)
         self.thread.sig_live_view.connect(self.slot_preview)
         self.thread.sig_photo.connect(self.slot_image)
-
-        ''' start '''
-        self.changeState(const.STATE_LIVE)
 
         self.usbDestPath = self.config.usb_path
         self.usbOutputPath = ""
         self.checkMemory()
+
+        # start, will also start threading
+        self.changeState(const.STATE_LIVE)
 
 
     def updateGui(self):
@@ -133,6 +133,12 @@ class Box(QObject):
                                      int(button.height() * self.config.knob_icon_factor)))
             button.show()
 
+    def show_config_button(self, show):
+        if show and self.show_config:
+            self.ui.btConfig.show()
+        else:
+            self.ui.btConfig.hide()
+
     def checkSdState(self):
         '''
         - SD vorhanden
@@ -156,11 +162,11 @@ class Box(QObject):
             p = subprocess.Popen(['df','-l','--output=target,iavail'], stdout=subprocess.PIPE)
             out, err = p.communicate()
         except:
-            out = b"/media/pi/ 500000000"
+            out = self.config.usb_root + b"/usb-stick/ 50000"
 
         self.usb_dir = False
         for line in out.splitlines():
-            if b"/media/pi/" in line:
+            if self.config.usb_root in line:
                 self.usb_dir, availableSpace = line.split()
                 self.usb_dir = self.usb_dir.decode()
 
@@ -191,7 +197,7 @@ class Box(QObject):
                     try:
                         os.makedirs(self.usbOutputPath)
                     except:
-                        print("Path %s could not be created.", self.usbOutputPath)
+                        print("Path could not be created: ", self.usbOutputPath)
             
             if usbState == const.MEMSTATE_OK:
                 img = False
@@ -226,7 +232,7 @@ class Box(QObject):
         self.ui.lblZahl.hide()
 
         self.ui.btAbbruch.hide()
-        self.ui.btConfig.hide()
+        self.show_config_button(False)
         self.ui.btUntenRechts.hide()
 
         if state == const.STATE_LIVE:
@@ -236,7 +242,7 @@ class Box(QObject):
             - kein Abbruchknopf
             '''
             self.setButtonImg(self.ui.btUntenRechts, const.IMG_CAM)
-            self.ui.btConfig.show()
+            self.show_config_button(True)
             self.thread.start_live()
             self.timer_bist.start()
 
