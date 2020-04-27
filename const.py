@@ -12,7 +12,7 @@ Bilder/Icons
 BASE_PATH = os.path.dirname(__file__)
 IMG_PATH  = BASE_PATH + "/icons"
 
-print("icon-path: ", IMG_PATH)
+# print("icon-path: ", IMG_PATH)
 
 IMG_ABORT = IMG_PATH + "/abort_trash.png"
 IMG_WARN  = IMG_PATH + "/attention.png"

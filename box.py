@@ -87,9 +87,8 @@ class Box(QObject):
         parent.showFullScreen()
 
         # setup camera + camera-thread
-        self.thread = Threading(parent)
-        # careful not to do anything after the thread was started
-        self.thread.cam.set_memory_type(self.config.camera_memory)
+        self.thread = Threading(parent, self.config.camera_memory)
+
         self.thread.sig_live_view.connect(self.slot_preview)
         self.thread.sig_photo.connect(self.slot_image)
 
