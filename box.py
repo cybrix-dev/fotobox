@@ -268,10 +268,13 @@ class Box(QObject):
         :param image:
         '''
         self.preview.loadFromData(image)
-        self.ui.bild.setPixmap(self.preview.scaled(
-            self.ui.bild.width(),
-            self.ui.bild.height(),
-            self.config.image_resize_type))
+        
+        if self.config.image_mirrored:
+            self.preview = self.preview.transformed(QTransform().scale(-1, 1))
+            
+        self.ui.bild.setPixmap(self.preview.scaled(self.ui.bild.width(),
+                                                   self.ui.bild.height(),
+                                                   self.config.image_resize_type))
         self.ui.bild.setAlignment(Qt.AlignHCenter)
         self.ui.bild.setAlignment(Qt.AlignCenter)
         self.ui.bild.show()

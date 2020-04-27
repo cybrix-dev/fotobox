@@ -8,7 +8,9 @@ class Config:
 
         self.knob_resize_factor = 1
         self.knob_icon_factor = 0.75
+        
         self.image_resize_type = Qt.KeepAspectRatioByExpanding
+        self.image_mirrored = True
 
         self.critical_space = 100000  # in KB - 100MB
 
@@ -18,5 +20,6 @@ class Config:
         self.usb_root = b"/media/pi"
         self.usb_path = "photobox"
         self.usb_file_string = "%Y-%m-%d_%H-%M-%S.jpg"
+        
         self.camera_memory = "SD"
 
