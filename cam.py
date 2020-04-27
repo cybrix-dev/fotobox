@@ -77,11 +77,13 @@ class Camera:
         '''
         if debug:
             self.index += 1
-            time.sleep(0.05)
-            if (self.index % 2) == 0:
+            time.sleep(0.2)
+            if (self.index % 3) == 0:
                 file = const.IMG_PATH + '/test1.jpg'
+            elif (self.index % 3) == 1:
+                file = const.IMG_PATH + '/test2.jpg'    
             else:
-                file = const.IMG_PATH + '/test2.jpg'
+                file = const.IMG_PATH + '/test3.jpg'
             return io.FileIO(file).read()
         else:
             # capture preview image (not saved to camera memory card)
@@ -90,7 +92,7 @@ class Camera:
     def capture_image(self):
         self.last_image = True
         if debug:
-            return io.FileIO(const.IMG_PATH + '/test3.jpg').read()
+            return io.FileIO(const.IMG_PATH + '/test4.jpg').read()
         else:
             try:
                 self.file_path = gp.check_result(gp.gp_camera_capture(self.cam, gp.GP_CAPTURE_IMAGE))
