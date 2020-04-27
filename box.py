@@ -162,13 +162,13 @@ class Box(QObject):
             p = subprocess.Popen(['df','-l','--output=target,iavail'], stdout=subprocess.PIPE)
             out, err = p.communicate()
         except:
-            out = self.config.usb_root + b"/usb-stick/ 50000"
+            out = self.config.usb_root + b"/usb-stick 50000"
 
         self.usb_dir = False
         for line in out.splitlines():
             if self.config.usb_root in line:
                 self.usb_dir, availableSpace = line.split()
-                self.usb_dir = self.usb_dir.decode()
+                self.usb_dir = self.usb_dir.decode() + "/"
 
         if not self.usb_dir:
             return const.MEMSTATE_MISSING
