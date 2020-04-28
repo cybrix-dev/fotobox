@@ -120,9 +120,21 @@ Sind die Änderungen abgeschlossen, wird mit `pyuic5 -x gui.ui -o ui.py` die Dat
 der `gui.ui` hinterlegt und dadurch in `ui.py` verwendet.
 
 Das führt zum Absturz, wenn das GUI initialisiert wird. Nach Aktualisieren der `ui.py` deshalb 
-auf dem Zielgerät testen mit `python3 ui.py`. Kommt es dabei zum Absturz mit , muss folgendes aus 
-`gui.ui` entfernt werden:
+auf dem Zielgerät testen mit `python3 ui.py`. Dabei kann es zum Absturz kommen, mit:  
 ```
+```
+Dann müssen alle Blöcke mit folgendem Inhalt aus `gui.ui` entfernt werden:
+```
+       <colorrole role="PlaceholderText">
+        <brush brushstyle="NoBrush">
+         <color alpha="128">
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
+        </brush>
+       </colorrole>
+
 ```
 
 ### Debugging
