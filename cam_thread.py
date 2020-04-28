@@ -4,6 +4,7 @@ from cam import Camera
 from PyQt5.QtCore import (QCoreApplication, QObject, QRunnable, QThread,
                           QThreadPool, pyqtSignal)
 from enum import Enum
+import time
 
 
 class Action(Enum):
@@ -61,10 +62,12 @@ class Threading(QThread):
 
     def run(self):
         state = const.STATE_LIVE
+        ts = 0
         while True:
             old_state = state
             if not self.cmd_fifo.empty():
                 state = self.cmd_fifo.get()
+                ts = time.time()
 
             if state == Action.PREVIEW:
                 # kontinuierlich livebild abholen und an GUI senden
@@ -85,7 +88,16 @@ class Threading(QThread):
                 return
             else:
                 # nichts machen, um CPU zu schonen, Pause
-                self.msleep(100)
+                # BUGFIX: wenn die Kamera 30min nicht verwendet wurde, schaltet sie sich automatisch aus.
+                # wenn man mind. diese Zeit auf dem Auswahlbildschirm steht, stuerzt beim naechsten Kamerazugriff
+                # die Applikation ab. Loesung: kontinuierlich alle x Sekunden preview von Kamera abholen,
+                # Daten aber verwerfen
+                if ((ts + 10) < time.time()):
+                    print("Fetch dummy-data")
+                    ts = time.time()
+                    self.cam.fetch_preview()
+                else:
+                    self.msleep(100)
 
 
 if __name__ == "__main__":
