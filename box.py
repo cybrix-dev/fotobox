@@ -302,7 +302,10 @@ class Box(QObject):
         if show:
             self.set_button_imgage(self.ui.btTrigger, const.IMG_CAM, self.config.trigger_transparency)
         else:
-            self.set_button_imgage(self.ui.btTrigger, False)
+            # hide can not be used, this button is also a spacer
+            self.ui.btTrigger.setText("")
+            self.ui.btTrigger.setIcon(QIcon())
+
         self.ui.btTrigger.setDisabled(not show)
 
     def slot_countdown(self):
