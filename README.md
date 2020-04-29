@@ -122,6 +122,7 @@ der `gui.ui` hinterlegt und dadurch in `ui.py` verwendet.
 Das führt zum Absturz, wenn das GUI initialisiert wird. Nach Aktualisieren der `ui.py` deshalb 
 auf dem Zielgerät testen mit `python3 ui.py`. Dabei kann es zum Absturz kommen, mit:  
 ```
+AttributeError: type object 'QPalette' has no attribute 'PlaceholderText'
 ```
 Dann müssen alle Blöcke mit folgendem Inhalt aus `gui.ui` entfernt werden:
 ```
