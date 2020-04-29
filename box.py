@@ -300,7 +300,7 @@ class Box(QObject):
 
     def show_trigger(self, show):
         if show:
-            self.setButtonImg(self.ui.btTrigger, const.IMG_CAM, 0.25)
+            self.setButtonImg(self.ui.btTrigger, const.IMG_CAM, self.config.trigger_transparency)
         else:
             self.setButtonImg(self.ui.btTrigger, False)
         self.ui.btTrigger.setDisabled(not show)

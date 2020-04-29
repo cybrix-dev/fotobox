@@ -8,7 +8,8 @@ class Config:
 
         self.knob_resize_factor = 1
         self.knob_icon_factor = 0.75
-        
+        self.trigger_transparency = 0.25
+
         self.image_resize_type = Qt.KeepAspectRatioByExpanding
         self.image_mirrored = True
 
