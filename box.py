@@ -128,9 +128,9 @@ class Box(QObject):
         - anzeigen
         '''
         if not filename:
-            button.setText("")
-            button.setIcon(QIcon())
+            button.hide()
         else:
+            button.show()
             button.setText("")
 
             if opacity < 1:
