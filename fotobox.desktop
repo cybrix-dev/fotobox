@@ -1,0 +1,4 @@
+[Desktop Entry]
+Type=Appliction
+Exec=/home/pi/fotobox/.autostart
+Terminal=true

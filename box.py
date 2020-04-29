@@ -14,6 +14,7 @@ import subprocess
 import os
 import time
 
+
 class MainWindowB(QMainWindow):
 
     sigResize = pyqtSignal()
@@ -39,11 +40,11 @@ class Box(QObject):
         self.ui = ui()
         self.ui.setupUi(parent)
 
-        self.initializeButton(self.ui.btSd)
-        self.initializeButton(self.ui.btUsb)
-        self.initializeButton(self.ui.btConfig)
-        self.initializeButton(self.ui.btAbbruch)
-        self.initializeButton(self.ui.btUntenRechts)
+        self.initialize_button(self.ui.btSd)
+        self.initialize_button(self.ui.btUsb)
+        self.initialize_button(self.ui.btConfig)
+        self.initialize_button(self.ui.btAbbruch)
+        self.initialize_button(self.ui.btAccept)
 
         # only show config-button if no configuration
         # TODO: or if the -config-parameter was used
@@ -67,14 +68,17 @@ class Box(QObject):
         '''
         nur als Abbbruch bei Bildern
         '''
-        self.setButtonImg(self.ui.btConfig, const.IMG_GEAR)
-        self.setButtonImg(self.ui.btAbbruch, const.IMG_ABORT)
+        self.set_button_imgage(self.ui.btConfig, const.IMG_GEAR)
+        self.set_button_imgage(self.ui.btAbbruch, const.IMG_ABORT)
+        self.set_button_imgage(self.ui.btAccept, const.IMG_OK)
+        self.set_button_imgage(self.ui.btTrigger, const.IMG_CAM)
         self.ui.btAbbruch.hide()
 
         '''
         Signal/Slot-Verbindungen
         '''
-        self.ui.btUntenRechts.clicked.connect(self.slot_btUntenRechts)
+        self.ui.btAccept.clicked.connect(self.slot_btAccept)
+        self.ui.btTrigger.clicked.connect(self.slot_btTrigger)
         self.ui.btAbbruch.clicked.connect(self.slot_btAbbruch)
         self.ui.btSd.clicked.connect(self.slot_btSd)
         self.ui.btUsb.clicked.connect(self.slot_btUsb)
@@ -83,7 +87,7 @@ class Box(QObject):
         self.count_timer.timeout.connect(self.slot_countdown)
         self.timer_bist.timeout.connect(self.slot_bist)
 
-        parent.sigResize.connect(self.updateGui)
+        parent.sigResize.connect(self.update_gui)
         parent.showFullScreen()
 
         # setup camera + camera-thread
@@ -94,20 +98,21 @@ class Box(QObject):
 
         self.usbDestPath = self.config.usb_path
         self.usbOutputPath = ""
-        self.checkMemory()
+        self.check_memory()
 
         # start, will also start threading
         self.changeState(const.STATE_LIVE)
 
-
-    def updateGui(self):
+    def update_gui(self):
         self.ui.gui.setGeometry(self.ui.centralwidget.geometry())
         self.ui.bild.setGeometry(self.ui.centralwidget.geometry())
+        self.ui.lblZahl.setGeometry(self.ui.centralwidget.geometry())
 
         self.ui.bild.raise_()
+        self.ui.lblZahl.raise_()
         self.ui.gui.raise_()
 
-    def initializeButton(self, button):
+    def initialize_button(self, button):
         '''
         Resizing
         '''
@@ -116,7 +121,7 @@ class Box(QObject):
         size.setHeight(size.height() * self.config.knob_resize_factor)
         button.setFixedSize(size)
 
-    def setButtonImg(self, button, filename):
+    def set_button_imgage(self, button, filename, opacity=1):
         '''
         - wenn kein Dateiname, dann Knopf verstecken
         - Setze Bild fuer Knopf/Anpassen der Groesse
@@ -125,8 +130,21 @@ class Box(QObject):
         if not filename:
             button.hide()
         else:
+            button.show()
             button.setText("")
-            button.setIcon(QIcon(filename))
+
+            if opacity < 1:
+                orgPix = QPixmap(filename)
+                transparent = QPixmap(orgPix.size())
+                transparent.fill(Qt.transparent)
+                painter = QPainter(transparent)
+                painter.setOpacity(opacity)
+                painter.drawPixmap(0, 0, orgPix)
+                painter.end()
+                icon = QIcon(transparent)
+            else:
+                icon = QIcon(filename)
+            button.setIcon(icon)
             # 10% vom Rand platz
             button.setIconSize(QSize(int(button.width() * self.config.knob_icon_factor),
                                      int(button.height() * self.config.knob_icon_factor)))
@@ -138,7 +156,7 @@ class Box(QObject):
         else:
             self.ui.btConfig.hide()
 
-    def checkSdState(self):
+    def check_sd_state(self):
         '''
         - SD vorhanden
         - SD genug Platz
@@ -152,7 +170,7 @@ class Box(QObject):
         else:
             return const.MEMSTATE_OK
 
-    def checkUsbState(self):
+    def check_usb_state(self):
         '''
         - USB vorhanden
         - USB genug Platz
@@ -176,7 +194,7 @@ class Box(QObject):
         else:
             return const.MEMSTATE_OK
 
-    def checkMemory(self):
+    def check_memory(self):
         '''
         Check:
         - SD-Karte vorhanden?
@@ -184,7 +202,7 @@ class Box(QObject):
         - USB-Stick vorhanden?
         - genug Platz auf Stick?
         '''
-        usbState = self.checkUsbState()
+        usbState = self.check_usb_state()
         if usbState != self.usbState:
             
             # create the directory if new USB-memory detected
@@ -206,10 +224,10 @@ class Box(QObject):
                 img = const.IMG_USB_MISSING
             else:
                 img = const.IMG_USB
-            self.setButtonImg(self.ui.btUsb, img)
+            self.set_button_imgage(self.ui.btUsb, img)
             self.usbState = usbState
 
-        sdState = self.checkSdState()
+        sdState = self.check_sd_state()
         if sdState != self.sdState:
             if sdState == const.MEMSTATE_OK:
                 img = False
@@ -219,7 +237,7 @@ class Box(QObject):
                 img = const.IMG_SD_MISSING
             else:
                 img = const.IMG_SD
-            self.setButtonImg(self.ui.btSd, img)
+            self.set_button_imgage(self.ui.btSd, img)
             self.sdState = sdState
 
     def changeState(self, state):
@@ -230,9 +248,10 @@ class Box(QObject):
         '''
         self.ui.lblZahl.hide()
 
+        self.show_trigger(False)
         self.ui.btAbbruch.hide()
+        self.ui.btAccept.hide()
         self.show_config_button(False)
-        self.ui.btUntenRechts.hide()
 
         if state == const.STATE_LIVE:
             '''
@@ -240,7 +259,7 @@ class Box(QObject):
             - kein Countdown
             - kein Abbruchknopf
             '''
-            self.setButtonImg(self.ui.btUntenRechts, const.IMG_CAM)
+            self.show_trigger(True)
             self.show_config_button(True)
             self.thread.start_live()
             self.timer_bist.start()
@@ -279,6 +298,16 @@ class Box(QObject):
         self.ui.bild.setAlignment(Qt.AlignCenter)
         self.ui.bild.show()
 
+    def show_trigger(self, show):
+        if show:
+            self.set_button_imgage(self.ui.btTrigger, const.IMG_CAM, self.config.trigger_transparency)
+        else:
+            # hide can not be used, this button is also a spacer
+            self.ui.btTrigger.setText("")
+            self.ui.btTrigger.setIcon(QIcon())
+
+        self.ui.btTrigger.setDisabled(not show)
+
     def slot_countdown(self):
         '''
         Slot fuer Timer-Signal, zaehlt runter und startet Foto bei 0
@@ -289,26 +318,28 @@ class Box(QObject):
         else:
             self.changeState(const.STATE_BILD)
 
-    def slot_btUntenRechts(self):
+    def slot_btTrigger(self):
         '''
         Knopf:
         - Countdown starten (Bild mit Kamera)
-        - Bild akzeptieren (Bild Checkbox)
         '''
         if self.state == const.STATE_LIVE:
             self.changeState(const.STATE_COUNT)
-        elif self.state == const.STATE_BILD:
-            if not self.usb_dir:
-                print("USB nicht verfuegbar")
-            else:
-                filename = self.usbOutputPath + "/" + time.strftime(self.config.usb_file_string)
-                self.thread.store_last(filename)
-                
-            self.changeState(const.STATE_LIVE)
-            self.checkMemory()
+
+    def slot_btAccept(self):
+        '''
+        Knopf:
+        - Bild akzeptieren (Bild Checkbox)
+        - zurueck zu LiveView
+        '''
+        if not self.usb_dir:
+            print("USB nicht verfuegbar")
         else:
-            print("Invalid state")
-            self.changeState(const.STATE_LIVE)
+            filename = self.usbOutputPath + "/" + time.strftime(self.config.usb_file_string)
+            self.thread.store_last(filename)
+
+        self.changeState(const.STATE_LIVE)
+        self.check_memory()
 
     def slot_btAbbruch(self):
         '''
@@ -350,13 +381,14 @@ class Box(QObject):
         '''
         Receiver-slot fuer Fotos
         '''
-        self.setButtonImg(self.ui.btUntenRechts, const.IMG_OK)
+        self.show_trigger(False)
+        self.ui.btAccept.show()
         self.ui.btAbbruch.show()
 
         self.showImage(image)
         
     def slot_bist(self):
-        self.checkMemory()
+        self.check_memory()
         
 if __name__ == "__main__":
     import sys
