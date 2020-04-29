@@ -103,6 +103,7 @@ class Box(QObject):
     def updateGui(self):
         self.ui.gui.setGeometry(self.ui.centralwidget.geometry())
         self.ui.bild.setGeometry(self.ui.centralwidget.geometry())
+        self.ui.lblZahl.setGeometry(self.ui.centralwidget.geometry())
 
         self.ui.bild.raise_()
         self.ui.gui.raise_()
