@@ -31,8 +31,8 @@ class Ui_Dialog(object):
         self.gridLayout_2.addWidget(self.labTransparency, 1, 2, 1, 1)
         self.slideCountdown = QtWidgets.QSlider(self.user)
         self.slideCountdown.setStyleSheet(".QSlider {\n"
-"    min-height: 68px;\n"
-"    max-height: 68px;\n"
+"    min-height: 55px;\n"
+"    max-height: 55px;\n"
 "}\n"
 "\n"
 ".QSlider::groove:horizontal {\n"
@@ -63,8 +63,8 @@ class Ui_Dialog(object):
         self.gridLayout_2.addWidget(self.labCountdown, 0, 2, 1, 1)
         self.slideTransparency = QtWidgets.QSlider(self.user)
         self.slideTransparency.setStyleSheet(".QSlider {\n"
-"    min-height: 68px;\n"
-"    max-height: 68px;\n"
+"    min-height: 55px;\n"
+"    max-height: 55px;\n"
 "}\n"
 "\n"
 ".QSlider::groove:horizontal {\n"

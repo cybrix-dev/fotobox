@@ -43,8 +43,8 @@
         <widget class="QSlider" name="slideCountdown">
          <property name="styleSheet">
           <string notr="true">.QSlider {
-    min-height: 68px;
-    max-height: 68px;
+    min-height: 55px;
+    max-height: 55px;
 }
 
 .QSlider::groove:horizontal {
@@ -103,8 +103,8 @@
         <widget class="QSlider" name="slideTransparency">
          <property name="styleSheet">
           <string notr="true">.QSlider {
-    min-height: 68px;
-    max-height: 68px;
+    min-height: 55px;
+    max-height: 55px;
 }
 
 .QSlider::groove:horizontal {
