@@ -4,7 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 checkBoxStyleSheet = "QCheckBox::indicator{open} width: {size}px; height: {size}px; {close}"
-sliderStyleSheet = "QSlider::handle:horizontal{open} width: {width}px; height: {height}px; {close}"
+#sliderStyleSheet = "QSlider::handle:horizontal{open} width: {width}px; height: {height}px; {close}"
 
 '''QSlider::handle:horizontal {
     background: #22B14C;
@@ -29,9 +29,9 @@ class Config(QObject):
         stylesheet = str(checkBoxStyleSheet).format(size=40, open="{", close="}")
         self.ui.ckImageFit.setStyleSheet(stylesheet)
 
-        stylesheet = str(sliderStyleSheet).format(width=40, height=60, open="{", close="}")
-        self.ui.slideCountdown.setStyleSheet(stylesheet)
-        self.ui.slideTransparency.setStyleSheet(stylesheet)
+        #stylesheet = str(sliderStyleSheet).format(width=40, height=60, open="{", close="}")
+        #self.ui.slideCountdown.setStyleSheet(stylesheet)
+        #self.ui.slideTransparency.setStyleSheet(stylesheet)
 
         self.hide_gui()
 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'config_gui.ui'
 #
-# Created by: PyQt5 UI code generator 5.14.1
+# Created by: PyQt5 UI code generator 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -30,6 +30,24 @@ class Ui_Dialog(object):
         self.labTransparency.setObjectName("labTransparency")
         self.gridLayout_2.addWidget(self.labTransparency, 1, 2, 1, 1)
         self.slideCountdown = QtWidgets.QSlider(self.user)
+        self.slideCountdown.setStyleSheet(".QSlider {\n"
+"    min-height: 68px;\n"
+"    max-height: 68px;\n"
+"}\n"
+"\n"
+".QSlider::groove:horizontal {\n"
+"    border: 1px solid #262626;\n"
+"    height: 5px;\n"
+"    margin: 0 12px;\n"
+"}\n"
+"\n"
+".QSlider::handle:horizontal {\n"
+"    border: 5px solid #777777;\n"
+"    width: 23px;\n"
+"    height: 100px;\n"
+"    margin: -24px -12px;\n"
+"    background: #444444\n"
+"}")
         self.slideCountdown.setMaximum(30)
         self.slideCountdown.setProperty("value", 3)
         self.slideCountdown.setOrientation(QtCore.Qt.Horizontal)
@@ -44,9 +62,26 @@ class Ui_Dialog(object):
         self.labCountdown.setObjectName("labCountdown")
         self.gridLayout_2.addWidget(self.labCountdown, 0, 2, 1, 1)
         self.slideTransparency = QtWidgets.QSlider(self.user)
+        self.slideTransparency.setStyleSheet(".QSlider {\n"
+"    min-height: 68px;\n"
+"    max-height: 68px;\n"
+"}\n"
+"\n"
+".QSlider::groove:horizontal {\n"
+"    border: 1px solid #262626;\n"
+"    height: 5px;\n"
+"    margin: 0 12px;\n"
+"}\n"
+"\n"
+".QSlider::handle:horizontal {\n"
+"    border: 5px solid #777777;\n"
+"    width: 23px;\n"
+"    height: 100px;\n"
+"    margin: -24px -12px;\n"
+"    background: #444444\n"
+"}")
         self.slideTransparency.setMaximum(100)
         self.slideTransparency.setSingleStep(5)
-        self.slideTransparency.setPageStep(20)
         self.slideTransparency.setProperty("value", 15)
         self.slideTransparency.setOrientation(QtCore.Qt.Horizontal)
         self.slideTransparency.setObjectName("slideTransparency")

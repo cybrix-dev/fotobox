@@ -41,6 +41,26 @@
        </item>
        <item row="0" column="1">
         <widget class="QSlider" name="slideCountdown">
+         <property name="styleSheet">
+          <string notr="true">.QSlider {
+    min-height: 68px;
+    max-height: 68px;
+}
+
+.QSlider::groove:horizontal {
+    border: 1px solid #262626;
+    height: 5px;
+    margin: 0 12px;
+}
+
+.QSlider::handle:horizontal {
+    border: 5px solid #777777;
+    width: 23px;
+    height: 100px;
+    margin: -24px -12px;
+	background: #444444
+}</string>
+         </property>
          <property name="maximum">
           <number>30</number>
          </property>
@@ -81,14 +101,31 @@
        </item>
        <item row="1" column="1">
         <widget class="QSlider" name="slideTransparency">
+         <property name="styleSheet">
+          <string notr="true">.QSlider {
+    min-height: 68px;
+    max-height: 68px;
+}
+
+.QSlider::groove:horizontal {
+    border: 1px solid #262626;
+    height: 5px;
+    margin: 0 12px;
+}
+
+.QSlider::handle:horizontal {
+    border: 5px solid #777777;
+    width: 23px;
+    height: 100px;
+    margin: -24px -12px;
+	background: #444444
+}</string>
+         </property>
          <property name="maximum">
           <number>100</number>
          </property>
          <property name="singleStep">
           <number>5</number>
-         </property>
-         <property name="pageStep">
-          <number>20</number>
          </property>
          <property name="value">
           <number>15</number>
