@@ -122,3 +122,14 @@ class Config(QObject):
 
         # trigger update in user-objects
         self.sig_finished.emit()
+
+
+if __name__ == "__main__":
+    import sys
+    import const
+
+    app = QApplication(sys.argv)
+    MainWindow = QDialog()
+    config = Config(MainWindow, const.INI_FILE)
+    config.open_config()
+    sys.exit(app.exec_())
