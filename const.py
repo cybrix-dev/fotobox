@@ -10,10 +10,13 @@ import os
 Bilder/Icons
 '''
 BASE_PATH = os.path.dirname(__file__)
+INI_FILE = BASE_PATH + "/fotobox.ini"
+
 IMG_PATH  = BASE_PATH + "/icons"
 
 # print("icon-path: ", IMG_PATH)
-
+IMG_CK_OFF = IMG_PATH + "/checkbox_checked.png"
+IMG_CK_ON = IMG_PATH + "/checkbox_unchecked.png"
 IMG_ABORT = IMG_PATH + "/abort_trash.png"
 IMG_WARN  = IMG_PATH + "/attention.png"
 IMG_ERR   = IMG_PATH + "/attention.png"

@@ -2,7 +2,7 @@
 Contains the complete GUI-handling.
 '''
 import const
-from ui import Ui_MainWindow as ui
+from main_gui import Ui_MainWindow as ui
 from cam_thread import Threading
 from config import Config
 
@@ -34,9 +34,10 @@ class Box(QObject):
         '''
         Constructor
         '''
-        QObject.__init__(self, parent)
+        super().__init__(parent)
 
-        self.config = Config()
+        # TODO: extract parameter for system-config from CLI-parameters
+        self.config = Config(parent, const.INI_FILE, False)
         self.ui = ui()
         self.ui.setupUi(parent)
 
@@ -48,7 +49,7 @@ class Box(QObject):
 
         # only show config-button if no configuration
         # TODO: or if the -config-parameter was used
-        self.show_config = not self.config.config_available
+        self.show_config = True
 
         self.preview = QPixmap()
         self.sdState = const.MEMSTATE_INIT
@@ -86,6 +87,8 @@ class Box(QObject):
 
         self.count_timer.timeout.connect(self.slot_countdown)
         self.timer_bist.timeout.connect(self.slot_bist)
+
+        self.config.sig_finished.connect(self.slot_update_config)
 
         parent.sigResize.connect(self.update_gui)
         parent.showFullScreen()
@@ -369,7 +372,7 @@ class Box(QObject):
         Knopf:
         - Konfiguration/Debug
         '''
-        self.changeState(const.STATE_BILD)
+        self.config.open_config()
 
     def slot_preview(self, image):
         '''
@@ -389,6 +392,10 @@ class Box(QObject):
         
     def slot_bist(self):
         self.check_memory()
+
+    def slot_update_config(self):
+        # GUI
+        self.changeState(self.state)
         
 if __name__ == "__main__":
     import sys
