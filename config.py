@@ -3,9 +3,11 @@ from config_gui import Ui_Dialog as ui
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-checkBoxStyleSheet = ("QCheckBox::indicator{ width: {}px; height: {}px; } "
-                      "QCheckBox::indicator:checked{ image: url({}); }    "
-                      "QCheckBox::indicator:unchecked{ image: url({}); }  ")
+checkBoxStyleSheet = \
+    ("QCheckBox::indicator{open} width: {size}px; height: {size}px; {close} "
+     "QCheckBox::indicator:checked{open} image: url({img_on}); {close}    "
+     "QCheckBox::indicator:unchecked{open} image: url({img_off}); {close}  "
+    )
 
 class Config(QObject):
 
@@ -18,8 +20,9 @@ class Config(QObject):
         self.ui = ui()
         self.ui.setupUi(self.dialog)
         self.ui.tabWidget.setTabEnabled(1, isSystem)
-        stylesheet = 
-        self.ui.ckImageFit.setStyleSheet(str(checkBoxStyleSheet).format(40, 40, const.IMG_CK_ON, const.IMG_CK_OFF))
+        stylesheet = str(checkBoxStyleSheet).format(size = 40, open = "{", close = "}", img_on = const.IMG_CK_ON, img_off = const.IMG_CK_OFF)
+        print(stylesheet)
+        self.ui.ckImageFit.setStyleSheet(stylesheet)
         self.hide_gui()
 
         self.ui.slideCountdown.valueChanged.connect(self.slot_slide_countdown_changed)
@@ -77,7 +80,7 @@ class Config(QObject):
         if load:
             # load the current values into GUI
             self.ui.slideCountdown.setValue(self.countdown)
-            self.ui.slideTransparency.setValue((1 - self.trigger_transparency)*100)
+            self.ui.slideTransparency.setValue(int((1 - self.trigger_transparency)*100))
 
             # checked: zoom-in for perfect fit
             isChecked = (self.image_resize_type == Qt.KeepAspectRatioByExpanding)
@@ -130,6 +133,6 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     MainWindow = QDialog()
-    config = Config(MainWindow, const.INI_FILE)
+    config = Config(MainWindow, const.INI_FILE, True)
     config.open_config()
     sys.exit(app.exec_())
