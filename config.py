@@ -3,11 +3,16 @@ from config_gui import Ui_Dialog as ui
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-checkBoxStyleSheet = \
-    ("QCheckBox::indicator{open} width: {size}px; height: {size}px; {close} "
-     "QCheckBox::indicator:checked{open} image: url({img_on}); {close}    "
-     "QCheckBox::indicator:unchecked{open} image: url({img_off}); {close}  "
-    )
+checkBoxStyleSheet = "QCheckBox::indicator{open} width: {size}px; height: {size}px; {close}"
+sliderStyleSheet = "QSlider::handle:horizontal{open} width: {width}px; height: {height}px; {close}"
+
+'''QSlider::handle:horizontal {
+    background: #22B14C;
+    border: 5px solid #B5E61D;
+    width: 23px;
+    height: 100px;
+    margin: -24px -12px;
+}'''
 
 class Config(QObject):
 
@@ -20,9 +25,14 @@ class Config(QObject):
         self.ui = ui()
         self.ui.setupUi(self.dialog)
         self.ui.tabWidget.setTabEnabled(1, isSystem)
-        stylesheet = str(checkBoxStyleSheet).format(size = 40, open = "{", close = "}", img_on = const.IMG_CK_ON, img_off = const.IMG_CK_OFF)
-        print(stylesheet)
+
+        stylesheet = str(checkBoxStyleSheet).format(size=40, open="{", close="}")
         self.ui.ckImageFit.setStyleSheet(stylesheet)
+
+        stylesheet = str(sliderStyleSheet).format(width=40, height=60, open="{", close="}")
+        self.ui.slideCountdown.setStyleSheet(stylesheet)
+        self.ui.slideTransparency.setStyleSheet(stylesheet)
+
         self.hide_gui()
 
         self.ui.slideCountdown.valueChanged.connect(self.slot_slide_countdown_changed)
