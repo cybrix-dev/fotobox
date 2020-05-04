@@ -103,6 +103,7 @@ class Camera:
 
                 return camera_file.get_data_and_size()
             except:
+                self.last_image = False
                 return self.fetch_preview()
 
     def dismiss_last(self):
