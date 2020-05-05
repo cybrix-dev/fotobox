@@ -98,7 +98,8 @@ class Box(QObject):
 
         self.thread.sig_live_view.connect(self.slot_preview)
         self.thread.sig_photo.connect(self.slot_image)
-
+        self.thread.sig_error.connect(self.slot_error_preview)
+        
         self.usbDestPath = self.config.usb_path
         self.usbOutputPath = ""
         self.check_memory()
@@ -379,6 +380,14 @@ class Box(QObject):
         Receiver-slot fuer Liveview (nur im RAM)
         '''
         self.showImage(image)
+        
+    def slot_error_preview(self, image):
+        '''
+        Receiver-slot fuer Liveview (nur im RAM)
+        '''
+        self.showImage(image)
+        self.ui.btAbbruch.show()
+        self.show_trigger(False)
         
     def slot_image(self, image):
         '''

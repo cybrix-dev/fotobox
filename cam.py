@@ -90,9 +90,9 @@ class Camera:
             return self.prepare_pixmap( gp.check_result(gp.gp_camera_capture_preview(self.cam)))
 
     def capture_image(self):
-        self.last_image = True
         if debug:
-            return io.FileIO(const.IMG_PATH + '/test4.jpg').read()
+            result = io.FileIO(const.IMG_PATH + '/test4.jpg').read()
+            self.last_image = True
         else:
             try:
                 self.file_path = gp.check_result(gp.gp_camera_capture(self.cam, gp.GP_CAPTURE_IMAGE))
@@ -101,10 +101,13 @@ class Camera:
                                                     self.file_path.name,
                                                     gp.GP_FILE_TYPE_NORMAL))
 
-                return camera_file.get_data_and_size()
+                result = camera_file.get_data_and_size()
+                self.last_image = True
             except:
                 self.last_image = False
-                return self.fetch_preview()
+                result = self.fetch_preview()
+                
+        return result
 
     def dismiss_last(self):
         if self.last_image:
