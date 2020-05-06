@@ -26,8 +26,11 @@ class Config(QObject):
         self.ui.setupUi(self.dialog)
 
         if not isSystem:
-            self.ui.tabWidget.removeTab(1)
+            for i in range(0, self.ui.tabWidget.count()):
+                if self.ui.tabWidget.tabText(i) != "Anwender":
+                    self.ui.tabWidget.removeTab(i)
 
+        # increase size of checkbox to 40x40
         stylesheet = str(checkBoxStyleSheet).format(size=40, open="{", close="}")
         self.ui.ckImageFit.setStyleSheet(stylesheet)
         self.ui.ckImageMirrored.setStyleSheet(stylesheet)
@@ -59,19 +62,20 @@ class Config(QObject):
 
 
         # System tab
+        self.usb_root = b"/media/pi"
+        self.usb_path = "fotobox"
+        self.usb_file_string = "aa_%Y-%m-%d_%H-%M-%S.jpg"
+
+        self.critical_space = 100000  # in KB - 100MB
+        self.bist_interval = 5000  # memcheck interval in ms - 5s
+
+        self.camera_memory = "SD"
         self.image_mirrored = True
+
+        # GUI tab
         self.knob_resize_factor = 1
         self.knob_icon_factor = 0.75
 
-        self.critical_space = 100000  # in KB - 100MB
-
-        self.bist_interval = 5000  # memcheck interval in ms - 5s
-
-        self.usb_root = b"/media/pi"
-        self.usb_path = "photobox"
-        self.usb_file_string = "%Y-%m-%d_%H-%M-%S.jpg"
-        
-        self.camera_memory = "SD"
 
     def handle_config_file(self, load):
         settings = QSettings(self.filename)
@@ -92,29 +96,58 @@ class Config(QObject):
         settings.endGroup()
 
     def handle_gui(self, load):
-        if load:
-            # load the current values into GUI
-            self.ui.slideCountdown.setValue(self.countdown)
-            self.ui.slideTransparency.setValue(int((1 - self.trigger_transparency)*100))
-
-            # checked: zoom-in for perfect fit
-            isChecked = (self.image_resize_type == Qt.KeepAspectRatioByExpanding)
-            self.ui.ckImageFit.setChecked(isChecked)
-
-            # system-tab
-            self.ui.ckImageMirrored.setChecked(self.image_mirrored)
-            self.ui.lineUsbFilename.setText(self.usb_path)
-            self.ui.lineUsbFilename.setText(self.usb_file_string)
-            self.ui.lineUsbRoot.setText(self.usb_root.decode())
-
-        else:
-            if self.ui.ckImageFit.isChecked():
-                self.image_resize_type = Qt.KeepAspectRatioByExpanding
+        def handle_text(line, text, load):
+            if load:
+                line.setText(text)
             else:
-                self.image_resize_type = Qt.KeepAspectRatio
+                text = line.text()
+            return text
 
-            self.countdown = self.ui.slideCountdown.value()
-            self.trigger_transparency = 1 - (self.ui.slideTransparency.value()/100)
+        self.usb_path = handle_text(self.ui.lineUsbPath, self.usb_path, load)
+        self.usb_file_string = handle_text(self.ui.lineUsbFilename, self.usb_file_string, load)
+        self.usb_root = handle_text(self.ui.lineUsbRoot, self.usb_root.decode(), load).encode()
+
+        def handle_value(spin, value, load):
+            if load:
+                spin.setValue(value)
+            else:
+                value = spin.value()
+            return value
+
+        self.countdown = handle_value(self.ui.slideCountdown, self.countdown, load)
+        self.critical_space = handle_value(self.ui.spinCriticalMemory, self.critical_space, load)
+        self.bist_interval = handle_value(self.ui.spinBistInterval, self.bist_interval, load)
+        self.knob_resize_factor = handle_value(self.ui.spinKnobResize, self.knob_resize_factor, load)
+        self.knob_icon_factor = handle_value(self.ui.spinKnobIcon, self.knob_icon_factor, load)
+
+        value = int((1 - self.trigger_transparency)*100)
+        value = handle_value(self.ui.slideTransparency, value, load)
+        self.trigger_transparency = 1 - value/100
+
+        def handle_check(check, var, load):
+            if load:
+                check.setChecked(var)
+            else:
+                var = check.isChecked()
+            return var
+
+        self.image_mirrored = handle_check(self.ui.ckImageMirrored, self.image_mirrored, load)
+
+        stretch_image = (self.image_resize_type == Qt.KeepAspectRatioByExpanding)
+        stretch_image = handle_check(self.ui.ckImageFit, stretch_image, load)
+        if stretch_image:
+            self.image_resize_type = Qt.KeepAspectRatioByExpanding
+        else:
+            self.image_resize_type = Qt.KeepAspectRatio
+
+        if load:
+            self.ui.comboCameraMemory.setCurrentIndex(0)
+            for i in range(0, self.ui.comboCameraMemory.count()):
+                if self.ui.comboCameraMemory.itemText(i) == self.camera_memory:
+                    self.ui.comboCameraMemory.setCurrentIndex(i)
+                    break
+        else:
+            self.camera_memory = self.ui.comboCameraMemory.currentText()
 
     def load_from_file(self):
         self.handle_config_file(True)
