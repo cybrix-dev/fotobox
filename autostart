@@ -1,0 +1,6 @@
+cd $(dirname $0)
+python3 .
+if [ $? -ne 0 ]; then
+	echo reboot
+	# reboot
+fi
