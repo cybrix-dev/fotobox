@@ -29,7 +29,7 @@ class Box(QObject):
     classdocs
     '''
 
-    def __init__(self, parent):
+    def __init__(self, parent, config):
 
         '''
         Constructor
@@ -37,7 +37,7 @@ class Box(QObject):
         super().__init__(parent)
 
         # TODO: extract parameter for system-config from CLI-parameters
-        self.config = Config(parent, const.INI_FILE, False)
+        self.config = Config(parent, const.INI_FILE, config)
         self.ui = ui()
         self.ui.setupUi(parent)
 
@@ -46,10 +46,6 @@ class Box(QObject):
         self.initialize_button(self.ui.btConfig)
         self.initialize_button(self.ui.btAbbruch)
         self.initialize_button(self.ui.btAccept)
-
-        # only show config-button if no configuration
-        # TODO: or if the -config-parameter was used
-        self.show_config = True
 
         self.preview = QPixmap()
         self.sdState = const.MEMSTATE_INIT
@@ -154,7 +150,7 @@ class Box(QObject):
             button.show()
 
     def show_config_button(self, show):
-        if show and self.show_config:
+        if show:
             self.ui.btConfig.show()
         else:
             self.ui.btConfig.hide()
@@ -396,11 +392,47 @@ class Box(QObject):
     def slot_update_config(self):
         # GUI
         self.changeState(self.state)
-        
+
+class CliParser:
+    def __init__(self,app):
+        QApplication.setApplicationName("fotobox");
+        QApplication.setApplicationVersion("1.0");
+
+        self.parser = QCommandLineParser()
+        self.parser.setApplicationDescription("Fotobox")
+        self.parser.addHelpOption()
+        self.parser.addVersionOption()
+
+        self.cursorOption = QCommandLineOption(["m", "mouse-cursor"], QCoreApplication.translate("main", "Show mouse-cursor."))
+        self.parser.addOption(self.cursorOption)
+
+        self.configOption = QCommandLineOption(["c", "config"], QCoreApplication.translate("main", "Allow system-configuration."))
+        self.parser.addOption(self.configOption)
+
+        self.parser.process(app)
+
+    def is_mouse_cursor(self):
+        return self.parser.isSet(self.cursorOption)
+
+    def is_config_mode(self):
+        return self.parser.isSet(self.configOption)
+
+def start_gui(argv):
+    app = QApplication(argv)
+
+    parser = CliParser(app)
+
+    mainWindow = MainWindowB()
+    Box(mainWindow, parser.is_config_mode())
+
+    if not parser.is_mouse_cursor():
+        # disable mouse-cursor
+        app.setOverrideCursor(Qt.BlankCursor)
+
+    mainWindow.show()
+    return app.exec_()
+
+
 if __name__ == "__main__":
     import sys
-    app = QApplication(sys.argv)
-    MainWindow = MainWindowB()
-    test = Box(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
+    sys.exit(start_gui(sys.argv))

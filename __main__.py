@@ -1,28 +1,14 @@
 import sys
 import time
-
-from PyQt5.Qt import QApplication
-from PyQt5.QtCore import Qt
-from box import MainWindowB, Box
-
-def show_gui():
-    print("__main__ calling")
-    app = QApplication(sys.argv)
-
-    # disable mouse-cursor
-    app.setOverrideCursor(Qt.BlankCursor)
-
-    MainWindow = MainWindowB()
-    test = Box(MainWindow)
-    MainWindow.show()
-    return app.exec_()
+import box
 
 # start of main
+print("__main__ calling")
 res = -1
 while res != 0:
     start_time = time.time()
     try:
-        res = show_gui()
+        res = box.start_gui(sys.argv)
     except:
         res = -1
     stop_time = time.time()

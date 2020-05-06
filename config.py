@@ -24,10 +24,13 @@ class Config(QObject):
         self.dialog = QDialog(parent)
         self.ui = ui()
         self.ui.setupUi(self.dialog)
-        self.ui.tabWidget.setTabEnabled(1, isSystem)
+
+        if not isSystem:
+            self.ui.tabWidget.removeTab(1)
 
         stylesheet = str(checkBoxStyleSheet).format(size=40, open="{", close="}")
         self.ui.ckImageFit.setStyleSheet(stylesheet)
+        self.ui.ckImageMirrored.setStyleSheet(stylesheet)
 
         #stylesheet = str(sliderStyleSheet).format(width=40, height=60, open="{", close="}")
         #self.ui.slideCountdown.setStyleSheet(stylesheet)
@@ -41,8 +44,8 @@ class Config(QObject):
 
         self.filename = iniFilename
         self.load_defaults()
-        self.config_available = True  # TODO: use INI-file
-        
+        self.load_from_file()
+
     def show_gui(self):
         self.dialog.showFullScreen()
 
@@ -50,16 +53,17 @@ class Config(QObject):
         self.dialog.hide()
         
     def load_defaults(self):
-        self.knob_resize_factor = 1
-        self.knob_icon_factor = 0.75
+        # Anwender Tab
         self.trigger_transparency = 0.25
-
+        self.countdown = 3  # countdown-timer in s - 3s
         self.image_resize_type = Qt.KeepAspectRatioByExpanding
+
+
+        # System tab
         self.image_mirrored = True
 
         self.critical_space = 100000  # in KB - 100MB
 
-        self.countdown = 3  # countdown-timer in s - 3s
         self.bist_interval = 5000  # memcheck interval in ms - 5s
 
         self.usb_root = b"/media/pi"
