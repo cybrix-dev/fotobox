@@ -18,7 +18,7 @@ class Config(QObject):
 
     sig_finished = pyqtSignal()
 
-    def __init__(self, parent, iniFilename, isSystem):
+    def __init__(self, parent, iniFilename, isSystem, camMemory=["SD"]):
         super().__init__(parent)
 
         self.dialog = QDialog(parent)
@@ -32,15 +32,14 @@ class Config(QObject):
         self.ui.ckImageFit.setStyleSheet(stylesheet)
         self.ui.ckImageMirrored.setStyleSheet(stylesheet)
 
-        #stylesheet = str(sliderStyleSheet).format(width=40, height=60, open="{", close="}")
-        #self.ui.slideCountdown.setStyleSheet(stylesheet)
-        #self.ui.slideTransparency.setStyleSheet(stylesheet)
-
         self.hide_gui()
 
         self.ui.slideCountdown.valueChanged.connect(self.slot_slide_countdown_changed)
         self.ui.slideTransparency.valueChanged.connect(self.slot_slide_transparency_changed)
         self.ui.buttonBox.accepted.connect(self.slot_new_config)
+
+        for item in camMemory:
+            self.ui.comboCameraMemory.addItem(item)
 
         self.filename = iniFilename
         self.load_defaults()
@@ -61,6 +60,8 @@ class Config(QObject):
 
         # System tab
         self.image_mirrored = True
+        self.knob_resize_factor = 1
+        self.knob_icon_factor = 0.75
 
         self.critical_space = 100000  # in KB - 100MB
 
@@ -99,6 +100,12 @@ class Config(QObject):
             # checked: zoom-in for perfect fit
             isChecked = (self.image_resize_type == Qt.KeepAspectRatioByExpanding)
             self.ui.ckImageFit.setChecked(isChecked)
+
+            # system-tab
+            self.ui.ckImageMirrored.setChecked(self.image_mirrored)
+            self.ui.lineUsbFilename.setText(self.usb_path)
+            self.ui.lineUsbFilename.setText(self.usb_file_string)
+            self.ui.lineUsbRoot.setText(self.usb_root.decode())
 
         else:
             if self.ui.ckImageFit.isChecked():
