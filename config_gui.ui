@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1153</width>
-    <height>655</height>
+    <width>1134</width>
+    <height>682</height>
    </rect>
   </property>
   <property name="font">
@@ -19,6 +19,16 @@
    <string>Konfiguration</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
@@ -238,7 +248,7 @@
           <string>Allgemein</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_6">
-          <item row="2" column="1">
+          <item row="1" column="1">
            <widget class="QSpinBox" name="spinBistInterval">
             <property name="maximum">
              <number>30000</number>
@@ -248,7 +258,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="0" column="1">
            <widget class="QSpinBox" name="spinCriticalMemory">
             <property name="maximum">
              <number>1000</number>
@@ -258,24 +268,67 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="1" column="0">
            <widget class="QLabel" name="label_4">
             <property name="text">
              <string>Intervall Speichercheck (ms)</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
+          <item row="0" column="0">
            <widget class="QLabel" name="label_3">
             <property name="text">
              <string>Kritischer Speicherplatz (MB)</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="0" colspan="2">
+         </layout>
+        </widget>
+       </item>
+       <item row="5" column="0" colspan="2">
+        <widget class="QGroupBox" name="groupBox_4">
+         <property name="title">
+          <string>Gui</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_7">
+          <item row="0" column="0">
            <widget class="QCheckBox" name="ckImageMirrored">
             <property name="text">
              <string>Bild gespiegelt</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QDoubleSpinBox" name="spinKnobResize">
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Touchgröße kleine Knöpfe</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QDoubleSpinBox" name="spinKnobIcon">
+            <property name="value">
+             <double>0.750000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Icongröße kleine Knöpfe</string>
             </property>
            </widget>
           </item>
@@ -284,16 +337,6 @@
        </item>
       </layout>
      </widget>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
     </widget>
    </item>
   </layout>
