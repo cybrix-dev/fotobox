@@ -1,7 +1,7 @@
-import const
 from config_gui import Ui_Dialog as ui
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
+from inspect import _is_type
 
 checkBoxStyleSheet = "QCheckBox::indicator{open} width: {size}px; height: {size}px; {close}"
 #sliderStyleSheet = "QSlider::handle:horizontal{open} width: {width}px; height: {height}px; {close}"
@@ -17,6 +17,7 @@ checkBoxStyleSheet = "QCheckBox::indicator{open} width: {size}px; height: {size}
 class Config(QObject):
 
     sig_finished = pyqtSignal()
+    sig_reset = pyqtSignal()
 
     def __init__(self, parent, iniFilename, isSystem, camMemory=["SD"]):
         super().__init__(parent)
@@ -26,7 +27,9 @@ class Config(QObject):
         self.ui.setupUi(self.dialog)
 
         if not isSystem:
-            for i in range(0, self.ui.tabWidget.count()):
+            self.ui.btReset.hide()
+            count = self.ui.tabWidget.count()
+            for i in range(count-1, 0, -1):
                 if self.ui.tabWidget.tabText(i) != "Anwender":
                     self.ui.tabWidget.removeTab(i)
 
@@ -40,6 +43,7 @@ class Config(QObject):
         self.ui.slideCountdown.valueChanged.connect(self.slot_slide_countdown_changed)
         self.ui.slideTransparency.valueChanged.connect(self.slot_slide_transparency_changed)
         self.ui.buttonBox.accepted.connect(self.slot_new_config)
+        self.ui.btReset.clicked.connect(self.slot_reset)
 
         for item in camMemory:
             self.ui.comboCameraMemory.addItem(item)
@@ -62,9 +66,9 @@ class Config(QObject):
 
 
         # System tab
-        self.usb_root = b"/media/pi"
+        self.usb_root = "/media/pi"
         self.usb_path = "fotobox"
-        self.usb_file_string = "aa_%Y-%m-%d_%H-%M-%S.jpg"
+        self.usb_file_string = "%Y-%m-%d_%H-%M-%S.jpg"
 
         self.critical_space = 100000  # in KB - 100MB
         self.bist_interval = 5000  # memcheck interval in ms - 5s
@@ -73,26 +77,50 @@ class Config(QObject):
         self.image_mirrored = True
 
         # GUI tab
-        self.knob_resize_factor = 1
+        self.knob_resize_factor = 1.0
         self.knob_icon_factor = 0.75
 
 
     def handle_config_file(self, load):
-        settings = QSettings(self.filename)
+        '''
+        Handles accessing the INI-file
+        
+        @param load: bool, marks if the content is loaded from file if set to True
+                     or if the content is written to file if set to False
+        '''
+        settings = QSettings(self.filename, QSettings.IniFormat)
 
+        def handle_value(settings, name, value, load):
+            if load:
+                tmp_value = settings.value(name, value)
+                value = type(value)(tmp_value)
+            else:
+                settings.setValue(name, str(value))
+            return value
+        
         settings.beginGroup("GUI")
-        settings.endGroup()
-
-        settings.beginGroup("Image")
+        self.knob_resize_factor = handle_value(settings, "knob_resize", self.knob_resize_factor, load)
+        self.knob_icon_factor = handle_value(settings, "knob_icon", self.knob_icon_factor, load)
+        
+        stretch_image = (self.image_resize_type == Qt.KeepAspectRatioByExpanding)
+        stretch_image = handle_value(settings, "stretch_image", stretch_image, load)
+        if stretch_image:
+            self.image_resize_type = Qt.KeepAspectRatioByExpanding
+        else:
+            self.image_resize_type = Qt.KeepAspectRatio
         settings.endGroup()
 
         settings.beginGroup("Camera")
+        
         settings.endGroup()
 
         settings.beginGroup("Timer")
         settings.endGroup()
 
         settings.beginGroup("USB")
+        self.usb_file_string = handle_value(settings, "filename", self.usb_file_string, load)
+        self.usb_path = handle_value(settings, "path", self.usb_path, load)
+        self.usb_root = handle_value(settings, "root", self.usb_root, load)  # byte-string
         settings.endGroup()
 
     def handle_gui(self, load):
@@ -105,7 +133,7 @@ class Config(QObject):
 
         self.usb_path = handle_text(self.ui.lineUsbPath, self.usb_path, load)
         self.usb_file_string = handle_text(self.ui.lineUsbFilename, self.usb_file_string, load)
-        self.usb_root = handle_text(self.ui.lineUsbRoot, self.usb_root.decode(), load).encode()
+        self.usb_root = handle_text(self.ui.lineUsbRoot, self.usb_root, load)
 
         def handle_value(spin, value, load):
             if load:
@@ -180,6 +208,10 @@ class Config(QObject):
         # trigger update in user-objects
         self.sig_finished.emit()
 
+
+    def slot_reset(self):
+        self.store_to_file()
+        self.sig_reset.emit()
 
 if __name__ == "__main__":
     import sys

@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(1140, 682)
+        Dialog.resize(843, 682)
         font = QtGui.QFont()
         font.setPointSize(25)
         Dialog.setFont(font)
@@ -23,7 +23,10 @@ class Ui_Dialog(object):
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName("buttonBox")
-        self.gridLayout.addWidget(self.buttonBox, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.buttonBox, 1, 1, 1, 1)
+        self.btReset = QtWidgets.QPushButton(Dialog)
+        self.btReset.setObjectName("btReset")
+        self.gridLayout.addWidget(self.btReset, 1, 0, 1, 1)
         self.tabWidget = QtWidgets.QTabWidget(Dialog)
         self.tabWidget.setObjectName("tabWidget")
         self.user = QtWidgets.QWidget()
@@ -155,12 +158,12 @@ class Ui_Dialog(object):
         self.label_8 = QtWidgets.QLabel(self.groupBox)
         self.label_8.setObjectName("label_8")
         self.gridLayout_4.addWidget(self.label_8, 2, 0, 1, 1)
-        self.lineUsbPath = QtWidgets.QLineEdit(self.groupBox)
-        self.lineUsbPath.setObjectName("lineUsbPath")
-        self.gridLayout_4.addWidget(self.lineUsbPath, 0, 1, 1, 1)
         self.lineUsbRoot = QtWidgets.QLineEdit(self.groupBox)
         self.lineUsbRoot.setObjectName("lineUsbRoot")
-        self.gridLayout_4.addWidget(self.lineUsbRoot, 1, 1, 1, 1)
+        self.gridLayout_4.addWidget(self.lineUsbRoot, 0, 1, 1, 1)
+        self.lineUsbPath = QtWidgets.QLineEdit(self.groupBox)
+        self.lineUsbPath.setObjectName("lineUsbPath")
+        self.gridLayout_4.addWidget(self.lineUsbPath, 1, 1, 1, 1)
         self.lineUsbFilename = QtWidgets.QLineEdit(self.groupBox)
         self.lineUsbFilename.setObjectName("lineUsbFilename")
         self.gridLayout_4.addWidget(self.lineUsbFilename, 2, 1, 1, 1)
@@ -191,7 +194,7 @@ class Ui_Dialog(object):
         self.spinKnobResize.setObjectName("spinKnobResize")
         self.gridLayout_7.addWidget(self.spinKnobResize, 0, 1, 1, 1)
         self.tabWidget.addTab(self.gui, "")
-        self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 2)
 
         self.retranslateUi(Dialog)
         self.tabWidget.setCurrentIndex(0)
@@ -202,6 +205,7 @@ class Ui_Dialog(object):
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Konfiguration"))
+        self.btReset.setText(_translate("Dialog", "Reset"))
         self.labTransparency.setText(_translate("Dialog", "15%"))
         self.label_2.setText(_translate("Dialog", "Transparenz Kamerasymbol"))
         self.labCountdown.setText(_translate("Dialog", "3s"))
@@ -214,12 +218,52 @@ class Ui_Dialog(object):
         self.groupBox_2.setTitle(_translate("Dialog", "Kamera"))
         self.label_7.setText(_translate("Dialog", "Speichermedium Kamera"))
         self.ckImageMirrored.setText(_translate("Dialog", "Bild gespiegelt"))
+        self.groupBox.setToolTip(_translate("Dialog", "<html><head/><body><p>Platzhalter im String (Auswahl):<br>\n"
+"%Y - Jahr als 2019<br>\n"
+"%y - Jahr als 19<br>\n"
+"%m - Monat als 06<br>\n"
+"%d - Tag als 01<br>\n"
+"%H - Stunde als 00 .. 23<br>\n"
+"%M - Minute als 00 .. 59<br>\n"
+"%S - Sekunde als 00 .. 59</p></body></html>"))
         self.groupBox.setTitle(_translate("Dialog", "USB"))
-        self.label_6.setText(_translate("Dialog", "Suchpfad für USB-Stick"))
-        self.label_5.setText(_translate("Dialog", "Pfad auf USB-Stick"))
+        self.label_6.setToolTip(_translate("Dialog", "<html><head/><body><p>Platzhalter im String (Auswahl):<br>\n"
+"%Y - Jahr als 2019<br>\n"
+"%y - Jahr als 19<br>\n"
+"%m - Monat als 06<br>\n"
+"%d - Tag als 01<br>\n"
+"%H - Stunde als 00 .. 23<br>\n"
+"%M - Minute als 00 .. 59<br>\n"
+"%S - Sekunde als 00 .. 59</p></body></html>"))
+        self.label_6.setText(_translate("Dialog", "Pfad auf USB-Stick"))
+        self.label_5.setText(_translate("Dialog", "Suchpfad für USB-Stick"))
+        self.label_8.setToolTip(_translate("Dialog", "<html><head/><body><p>Platzhalter im String (Auswahl):<br>\n"
+"%Y - Jahr als 2019<br>\n"
+"%y - Jahr als 19<br>\n"
+"%m - Monat als 06<br>\n"
+"%d - Tag als 01<br>\n"
+"%H - Stunde als 00 .. 23<br>\n"
+"%M - Minute als 00 .. 59<br>\n"
+"%S - Sekunde als 00 .. 59</p></body></html>"))
         self.label_8.setText(_translate("Dialog", "USB Filename"))
-        self.lineUsbPath.setText(_translate("Dialog", "fotobox"))
         self.lineUsbRoot.setText(_translate("Dialog", "/media/pi"))
+        self.lineUsbPath.setToolTip(_translate("Dialog", "<html><head/><body><p>Platzhalter im String (Auswahl):<br>\n"
+"%Y - Jahr als 2019<br>\n"
+"%y - Jahr als 19<br>\n"
+"%m - Monat als 06<br>\n"
+"%d - Tag als 01<br>\n"
+"%H - Stunde als 00 .. 23<br>\n"
+"%M - Minute als 00 .. 59<br>\n"
+"%S - Sekunde als 00 .. 59</p></body></html>"))
+        self.lineUsbPath.setText(_translate("Dialog", "fotobox"))
+        self.lineUsbFilename.setToolTip(_translate("Dialog", "<html><head/><body><p>Platzhalter im String (Auswahl):<br>\n"
+"%Y - Jahr als 2019<br>\n"
+"%y - Jahr als 19<br>\n"
+"%m - Monat als 06<br>\n"
+"%d - Tag als 01<br>\n"
+"%H - Stunde als 00 .. 23<br>\n"
+"%M - Minute als 00 .. 59<br>\n"
+"%S - Sekunde als 00 .. 59</p></body></html>"))
         self.lineUsbFilename.setText(_translate("Dialog", "%Y-%m-%d_%H-%M-%S.jpg"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.system), _translate("Dialog", "System"))
         self.label_10.setText(_translate("Dialog", "Icongröße kleine Knöpfe"))

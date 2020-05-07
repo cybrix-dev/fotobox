@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1140</width>
+    <width>843</width>
     <height>682</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
    <string>Konfiguration</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0">
+   <item row="1" column="1">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -29,7 +29,14 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="0">
+   <item row="1" column="0">
+    <widget class="QPushButton" name="btReset">
+     <property name="text">
+      <string>Reset</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="2">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
       <number>0</number>
@@ -269,47 +276,97 @@
        </item>
        <item row="1" column="0">
         <widget class="QGroupBox" name="groupBox">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Platzhalter im String (Auswahl):&lt;br&gt;
+%Y - Jahr als 2019&lt;br&gt;
+%y - Jahr als 19&lt;br&gt;
+%m - Monat als 06&lt;br&gt;
+%d - Tag als 01&lt;br&gt;
+%H - Stunde als 00 .. 23&lt;br&gt;
+%M - Minute als 00 .. 59&lt;br&gt;
+%S - Sekunde als 00 .. 59&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="title">
           <string>USB</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
           <item row="1" column="0">
            <widget class="QLabel" name="label_6">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Platzhalter im String (Auswahl):&lt;br&gt;
+%Y - Jahr als 2019&lt;br&gt;
+%y - Jahr als 19&lt;br&gt;
+%m - Monat als 06&lt;br&gt;
+%d - Tag als 01&lt;br&gt;
+%H - Stunde als 00 .. 23&lt;br&gt;
+%M - Minute als 00 .. 59&lt;br&gt;
+%S - Sekunde als 00 .. 59&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
-             <string>Suchpfad für USB-Stick</string>
+             <string>Pfad auf USB-Stick</string>
             </property>
            </widget>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_5">
             <property name="text">
-             <string>Pfad auf USB-Stick</string>
+             <string>Suchpfad für USB-Stick</string>
             </property>
            </widget>
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_8">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Platzhalter im String (Auswahl):&lt;br&gt;
+%Y - Jahr als 2019&lt;br&gt;
+%y - Jahr als 19&lt;br&gt;
+%m - Monat als 06&lt;br&gt;
+%d - Tag als 01&lt;br&gt;
+%H - Stunde als 00 .. 23&lt;br&gt;
+%M - Minute als 00 .. 59&lt;br&gt;
+%S - Sekunde als 00 .. 59&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>USB Filename</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="lineUsbPath">
-            <property name="text">
-             <string>fotobox</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
            <widget class="QLineEdit" name="lineUsbRoot">
             <property name="text">
              <string>/media/pi</string>
             </property>
            </widget>
           </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineUsbPath">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Platzhalter im String (Auswahl):&lt;br&gt;
+%Y - Jahr als 2019&lt;br&gt;
+%y - Jahr als 19&lt;br&gt;
+%m - Monat als 06&lt;br&gt;
+%d - Tag als 01&lt;br&gt;
+%H - Stunde als 00 .. 23&lt;br&gt;
+%M - Minute als 00 .. 59&lt;br&gt;
+%S - Sekunde als 00 .. 59&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>fotobox</string>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="1">
            <widget class="QLineEdit" name="lineUsbFilename">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Platzhalter im String (Auswahl):&lt;br&gt;
+%Y - Jahr als 2019&lt;br&gt;
+%y - Jahr als 19&lt;br&gt;
+%m - Monat als 06&lt;br&gt;
+%d - Tag als 01&lt;br&gt;
+%H - Stunde als 00 .. 23&lt;br&gt;
+%M - Minute als 00 .. 59&lt;br&gt;
+%S - Sekunde als 00 .. 59&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>%Y-%m-%d_%H-%M-%S.jpg</string>
             </property>

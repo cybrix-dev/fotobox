@@ -41,12 +41,7 @@ class Box(QObject):
         self.ui = ui()
         self.ui.setupUi(parent)
 
-        self.initialize_button(self.ui.btSd)
-        self.initialize_button(self.ui.btUsb)
-        self.initialize_button(self.ui.btConfig)
-        self.initialize_button(self.ui.btAbbruch)
-        self.initialize_button(self.ui.btAccept)
-
+        self.update_gui_elements()
         self.preview = QPixmap()
         self.sdState = const.MEMSTATE_INIT
         self.usbState = const.MEMSTATE_INIT
@@ -85,6 +80,7 @@ class Box(QObject):
         self.timer_bist.timeout.connect(self.slot_bist)
 
         self.config.sig_finished.connect(self.slot_update_config)
+        self.config.sig_reset.connect(self.slot_config_reset)
 
         parent.sigResize.connect(self.update_gui)
         parent.showFullScreen()
@@ -95,12 +91,18 @@ class Box(QObject):
         self.thread.sig_live_view.connect(self.slot_preview)
         self.thread.sig_photo.connect(self.slot_image)
 
-        self.usbDestPath = self.config.usb_path
         self.usbOutputPath = ""
         self.check_memory()
 
         # start, will also start threading
         self.changeState(const.STATE_LIVE)
+        
+    def update_gui_elements(self):
+        self.initialize_button(self.ui.btSd)
+        self.initialize_button(self.ui.btUsb)
+        self.initialize_button(self.ui.btConfig)
+        self.initialize_button(self.ui.btAbbruch)
+        self.initialize_button(self.ui.btAccept)
 
     def update_gui(self):
         self.ui.gui.setGeometry(self.ui.centralwidget.geometry())
@@ -116,8 +118,8 @@ class Box(QObject):
         Resizing
         '''
         size = button.size()
-        size.setWidth(size.width() * self.config.knob_resize_factor)
-        size.setHeight(size.height() * self.config.knob_resize_factor)
+        size.setWidth(int(size.width() * self.config.knob_resize_factor))
+        size.setHeight(int(size.height() * self.config.knob_resize_factor))
         button.setFixedSize(size)
 
     def set_button_imgage(self, button, filename, opacity=1):
@@ -163,11 +165,12 @@ class Box(QObject):
         sd_space = self.thread.get_available_space()
         if sd_space < 0:
             result = const.MEMSTATE_MISSING
-            return const.MEMSTATE_MISSING
         elif sd_space < self.config.critical_space:
-            return const.MEMSTATE_FULL
+            result = const.MEMSTATE_FULL
         else:
-            return const.MEMSTATE_OK
+            result = const.MEMSTATE_OK
+            
+        return result
 
     def check_usb_state(self):
         '''
@@ -176,15 +179,20 @@ class Box(QObject):
         '''
         try:
             p = subprocess.Popen(['df','-l','--output=target,iavail'], stdout=subprocess.PIPE)
-            out, err = p.communicate()
+            out, _ = p.communicate()
         except:
-            out = self.config.usb_root + b"/usb-stick 50000"
+            out = self.config.usb_root.encode() + b"/usb-stick 50000"
 
         self.usb_dir = False
         for line in out.splitlines():
+            line = line.decode()
             if self.config.usb_root in line:
                 self.usb_dir, availableSpace = line.split()
-                self.usb_dir = self.usb_dir.decode() + "/"
+                self.usb_dir = self.usb_dir + "/"
+#         for line in out.splitlines():
+#             if self.config.usb_root in line:
+#                 self.usb_dir, availableSpace = line.split()
+#                 self.usb_dir = self.usb_dir.decode() + "/"
 
         if not self.usb_dir:
             return const.MEMSTATE_MISSING
@@ -209,7 +217,7 @@ class Box(QObject):
                 if (self.usbState == const.MEMSTATE_MISSING
                         or self.usbState == const.MEMSTATE_INIT):
                     # create a new directory
-                    self.usbOutputPath = self.usb_dir + self.usbDestPath
+                    self.usbOutputPath = time.strftime(self.usb_dir + self.config.usb_path)
                     try:
                         os.makedirs(self.usbOutputPath)
                     except:
@@ -392,6 +400,9 @@ class Box(QObject):
     def slot_update_config(self):
         # GUI
         self.changeState(self.state)
+        
+    def slot_config_reset(self):
+        QApplication.exit(-1) 
 
 class CliParser:
     def __init__(self,app):
@@ -435,4 +446,6 @@ def start_gui(argv):
 
 if __name__ == "__main__":
     import sys
-    sys.exit(start_gui(sys.argv))
+    result = start_gui(sys.argv)
+    print("Result: ", result)
+    sys.exit(result)
