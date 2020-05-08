@@ -286,10 +286,14 @@ class Box(QObject):
             - Starte Countdown
             '''
             self.counter = self.config.countdown
-            self.ui.lblZahl.setText(str(self.counter))
-            self.ui.lblZahl.show()
-            self.count_timer.start(1000)
-            self.timer_bist.stop()
+            if self.counter > 0:
+                self.ui.lblZahl.setText(str(self.counter))
+                self.ui.lblZahl.show()
+                self.count_timer.start(1000)
+                self.timer_bist.stop()
+            else:
+                state = const.STATE_BILD
+                self.thread.capture_image()
 
         elif state == const.STATE_BILD:
             self.count_timer.stop()
@@ -395,7 +399,7 @@ class Box(QObject):
         
     def slot_error_preview(self, image):
         '''
-        Receiver-slot fuer Liveview (nur im RAM)
+        Receiver-slot fuer Preview obwohl Foto angefragt (nur im RAM)
         '''
         self.showImage(image)
         self.ui.btAbbruch.show()
