@@ -93,7 +93,6 @@ class Threading(QThread):
                 # die Applikation ab. Loesung: kontinuierlich alle x Sekunden preview von Kamera abholen,
                 # Daten aber verwerfen
                 if ((ts + 10) < time.time()):
-                    print("Fetch dummy-data")
                     ts = time.time()
                     self.cam.fetch_preview()
                 else:

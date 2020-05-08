@@ -6,13 +6,15 @@ from main_gui import Ui_MainWindow as ui
 from cam_thread import Threading
 from config import Config
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5.QtCore import pyqtSignal, Qt, QObject, QSize, QTimer
+from PyQt5.QtCore import QCommandLineParser, QCommandLineOption, QCoreApplication
+from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtGui import QPixmap, QPainter, QIcon, QTransform
 
 import subprocess
 import os
 import time
+import sys
 
 
 class MainWindowB(QMainWindow):
@@ -122,6 +124,15 @@ class Box(QObject):
         size.setHeight(int(size.height() * self.config.knob_resize_factor))
         button.setFixedSize(size)
 
+        
+    def resize_button(self, button):
+        width = button.width()
+        height = button.height()
+        button.setIconSize(
+            QSize(int(width * self.config.knob_icon_factor),
+                  int(height * self.config.knob_icon_factor)))
+
+
     def set_button_imgage(self, button, filename, opacity=1):
         '''
         - wenn kein Dateiname, dann Knopf verstecken
@@ -146,9 +157,8 @@ class Box(QObject):
             else:
                 icon = QIcon(filename)
             button.setIcon(icon)
+            self.resize_button(button)
             # 10% vom Rand platz
-            button.setIconSize(QSize(int(button.width() * self.config.knob_icon_factor),
-                                     int(button.height() * self.config.knob_icon_factor)))
             button.show()
 
     def show_config_button(self, show):
@@ -165,7 +175,7 @@ class Box(QObject):
         sd_space = self.thread.get_available_space()
         if sd_space < 0:
             result = const.MEMSTATE_MISSING
-        elif sd_space < self.config.critical_space:
+        elif sd_space <= self.config.critical_space:
             result = const.MEMSTATE_FULL
         else:
             result = const.MEMSTATE_OK
@@ -189,14 +199,11 @@ class Box(QObject):
             if self.config.usb_root in line:
                 self.usb_dir, availableSpace = line.split()
                 self.usb_dir = self.usb_dir + "/"
-#         for line in out.splitlines():
-#             if self.config.usb_root in line:
-#                 self.usb_dir, availableSpace = line.split()
-#                 self.usb_dir = self.usb_dir.decode() + "/"
+                break
 
         if not self.usb_dir:
             return const.MEMSTATE_MISSING
-        elif int(availableSpace) < self.config.critical_space:
+        elif int(availableSpace) <= self.config.critical_space:
             return const.MEMSTATE_FULL
         else:
             return const.MEMSTATE_OK
@@ -307,7 +314,7 @@ class Box(QObject):
 
     def show_trigger(self, show):
         if show:
-            self.set_button_imgage(self.ui.btTrigger, const.IMG_CAM, self.config.trigger_transparency)
+            self.set_button_imgage(self.ui.btTrigger, const.IMG_CAM, self.config.trigger_opacity)
         else:
             # hide can not be used, this button is also a spacer
             self.ui.btTrigger.setText("")
@@ -383,6 +390,7 @@ class Box(QObject):
         Receiver-slot fuer Liveview (nur im RAM)
         '''
         self.showImage(image)
+        self.resize_button(self.ui.btTrigger)
         
     def slot_image(self, image):
         '''
@@ -406,6 +414,7 @@ class Box(QObject):
 
 class CliParser:
     def __init__(self,app):
+
         QApplication.setApplicationName("fotobox");
         QApplication.setApplicationVersion("1.0");
 
@@ -445,7 +454,6 @@ def start_gui(argv):
 
 
 if __name__ == "__main__":
-    import sys
     result = start_gui(sys.argv)
     print("Result: ", result)
     sys.exit(result)

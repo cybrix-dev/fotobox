@@ -31,6 +31,7 @@ IMG_USB         = IMG_PATH + "/usb_stick.png"
 IMG_USB_FULL    = IMG_PATH + "/usb_warning.png"
 IMG_USB_MISSING = IMG_PATH + "/usb_missing.png"
 
+CHECKBOX_SIZE = 40  # Groesse der Checkboxen im Config-Menue
 
 '''
 Status der Applikation
