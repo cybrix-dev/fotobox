@@ -157,108 +157,27 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="system">
+     <widget class="QWidget" name="usb">
       <attribute name="title">
-       <string>System</string>
+       <string>USB</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_3">
-       <item row="3" column="0" colspan="2">
-        <widget class="QGroupBox" name="groupBox_3">
-         <property name="title">
-          <string>Allgemein</string>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Suchpfad für USB-Stick</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_6">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Kritischer Speicherplatz (MB)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QSpinBox" name="spinCriticalMemory">
-            <property name="maximum">
-             <number>1000</number>
-            </property>
-            <property name="value">
-             <number>50</number>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Intervall Speichercheck (ms)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="spinBistInterval">
-            <property name="maximum">
-             <number>30000</number>
-            </property>
-            <property name="value">
-             <number>5000</number>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
         </widget>
        </item>
-       <item row="2" column="0" colspan="2">
-        <widget class="QGroupBox" name="groupBox_2">
-         <property name="title">
-          <string>Kamera</string>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="lineUsbRoot">
+         <property name="text">
+          <string>/media/pi</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_5">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Speichermedium Kamera</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="comboCameraMemory"/>
-          </item>
-          <item row="0" column="2">
-           <spacer name="horizontalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="1" column="0" colspan="2">
-           <widget class="QCheckBox" name="ckImageMirrored">
-            <property name="text">
-             <string>Bild gespiegelt</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QGroupBox" name="groupBox">
+        <widget class="QLabel" name="label_6">
          <property name="toolTip">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Platzhalter im String (Auswahl):&lt;br&gt;
 %Y - Jahr als 2019&lt;br&gt;
@@ -269,94 +188,74 @@
 %M - Minute als 00 .. 59&lt;br&gt;
 %S - Sekunde als 00 .. 59&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
-         <property name="title">
-          <string>USB</string>
+         <property name="text">
+          <string>Neues Verzeichnis</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_4">
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_6">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Platzhalter im String (Auswahl):&lt;br&gt;
-%Y - Jahr als 2019&lt;br&gt;
-%y - Jahr als 19&lt;br&gt;
-%m - Monat als 06&lt;br&gt;
-%d - Tag als 01&lt;br&gt;
-%H - Stunde als 00 .. 23&lt;br&gt;
-%M - Minute als 00 .. 59&lt;br&gt;
-%S - Sekunde als 00 .. 59&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Pfad auf USB-Stick</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>Suchpfad für USB-Stick</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_8">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Platzhalter im String (Auswahl):&lt;br&gt;
-%Y - Jahr als 2019&lt;br&gt;
-%y - Jahr als 19&lt;br&gt;
-%m - Monat als 06&lt;br&gt;
-%d - Tag als 01&lt;br&gt;
-%H - Stunde als 00 .. 23&lt;br&gt;
-%M - Minute als 00 .. 59&lt;br&gt;
-%S - Sekunde als 00 .. 59&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>USB Filename</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="lineUsbRoot">
-            <property name="text">
-             <string>/media/pi</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="lineUsbPath">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Platzhalter im String (Auswahl):&lt;br&gt;
-%Y - Jahr als 2019&lt;br&gt;
-%y - Jahr als 19&lt;br&gt;
-%m - Monat als 06&lt;br&gt;
-%d - Tag als 01&lt;br&gt;
-%H - Stunde als 00 .. 23&lt;br&gt;
-%M - Minute als 00 .. 59&lt;br&gt;
-%S - Sekunde als 00 .. 59&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>%Y-%m-%d_fotobox</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="lineUsbFilename">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Platzhalter im String (Auswahl):&lt;br&gt;
-%Y - Jahr als 2019&lt;br&gt;
-%y - Jahr als 19&lt;br&gt;
-%m - Monat als 06&lt;br&gt;
-%d - Tag als 01&lt;br&gt;
-%H - Stunde als 00 .. 23&lt;br&gt;
-%M - Minute als 00 .. 59&lt;br&gt;
-%S - Sekunde als 00 .. 59&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>%Y-%m-%d_%H-%M-%S.jpg</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
         </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="lineUsbPath">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Platzhalter im String (Auswahl):&lt;br&gt;
+%Y - Jahr als 2019&lt;br&gt;
+%y - Jahr als 19&lt;br&gt;
+%m - Monat als 06&lt;br&gt;
+%d - Tag als 01&lt;br&gt;
+%H - Stunde als 00 .. 23&lt;br&gt;
+%M - Minute als 00 .. 59&lt;br&gt;
+%S - Sekunde als 00 .. 59&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>%Y-%m-%d_fotobox</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_8">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Platzhalter im String (Auswahl):&lt;br&gt;
+%Y - Jahr als 2019&lt;br&gt;
+%y - Jahr als 19&lt;br&gt;
+%m - Monat als 06&lt;br&gt;
+%d - Tag als 01&lt;br&gt;
+%H - Stunde als 00 .. 23&lt;br&gt;
+%M - Minute als 00 .. 59&lt;br&gt;
+%S - Sekunde als 00 .. 59&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Dateiname</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="lineUsbFilename">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Platzhalter im String (Auswahl):&lt;br&gt;
+%Y - Jahr als 2019&lt;br&gt;
+%y - Jahr als 19&lt;br&gt;
+%m - Monat als 06&lt;br&gt;
+%d - Tag als 01&lt;br&gt;
+%H - Stunde als 00 .. 23&lt;br&gt;
+%M - Minute als 00 .. 59&lt;br&gt;
+%S - Sekunde als 00 .. 59&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>%Y-%m-%d_%H-%M-%S.jpg</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <spacer name="verticalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>380</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -424,6 +323,123 @@
           <double>1.000000000000000</double>
          </property>
         </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="camera">
+      <attribute name="title">
+       <string>Kamera</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>Speichermedium Kamera</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <widget class="QCheckBox" name="ckImageMirrored">
+         <property name="text">
+          <string>Bild gespiegelt</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="comboCameraMemory"/>
+       </item>
+       <item row="2" column="0">
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="0" column="2">
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="general">
+      <attribute name="title">
+       <string>Allgemein</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Kritischer Speicherplatz (MB)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QSpinBox" name="spinCriticalMemory">
+         <property name="maximum">
+          <number>1000</number>
+         </property>
+         <property name="value">
+          <number>50</number>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>236</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Intervall Speichercheck (ms)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QSpinBox" name="spinBistInterval">
+         <property name="maximum">
+          <number>30000</number>
+         </property>
+         <property name="value">
+          <number>5000</number>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>432</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
