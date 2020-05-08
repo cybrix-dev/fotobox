@@ -130,13 +130,27 @@ class Camera:
                 gp.check_result(gp.gp_file_save( camera_file, dest ))
             self.last_image = False
 
-    def get_available_space(self):
+    def print_mem_device(self, mem):
+        print("description:   ", mem.description)
+        print("basedir:       ", mem.basedir)
+        print("label:         ", mem.label)
+        print("type:          ", mem.type)
+        print("fstype:        ", mem.fstype)
+        print("access:        ", mem.access)
+        print("capacitykbytes:", mem.capacitykbytes)
+        print("freekbytes:    ", mem.freekbytes)
+        print("freeimages:    ", mem.freeimages)
+        print("fields:        ", mem.fields)
+
+    def get_available_space(self, print_info=False):
         if debug:
             result = 50000
         else:
             result = -1
             arr = gp.check_result(gp.gp_camera_get_storageinfo(self.cam))
             for mem in arr:
+                if print_info:
+                    self.print_mem_device(mem)
                 if mem.description == self.memory_type:
                     result = mem.freekbytes
                     break
