@@ -19,14 +19,6 @@ class Ui_Dialog(object):
         Dialog.setFont(font)
         self.gridLayout = QtWidgets.QGridLayout(Dialog)
         self.gridLayout.setObjectName("gridLayout")
-        self.buttonBox = QtWidgets.QDialogButtonBox(Dialog)
-        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
-        self.buttonBox.setObjectName("buttonBox")
-        self.gridLayout.addWidget(self.buttonBox, 1, 1, 1, 1)
-        self.btReset = QtWidgets.QPushButton(Dialog)
-        self.btReset.setObjectName("btReset")
-        self.gridLayout.addWidget(self.btReset, 1, 0, 1, 1)
         self.tabWidget = QtWidgets.QTabWidget(Dialog)
         self.tabWidget.setObjectName("tabWidget")
         self.user = QtWidgets.QWidget()
@@ -194,7 +186,18 @@ class Ui_Dialog(object):
         self.spinKnobResize.setObjectName("spinKnobResize")
         self.gridLayout_7.addWidget(self.spinKnobResize, 0, 1, 1, 1)
         self.tabWidget.addTab(self.gui, "")
-        self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 2)
+        self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 3)
+        self.btReset = QtWidgets.QPushButton(Dialog)
+        self.btReset.setObjectName("btReset")
+        self.gridLayout.addWidget(self.btReset, 1, 0, 1, 1)
+        self.buttonBox = QtWidgets.QDialogButtonBox(Dialog)
+        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
+        self.buttonBox.setObjectName("buttonBox")
+        self.gridLayout.addWidget(self.buttonBox, 1, 2, 1, 1)
+        self.btDefaults = QtWidgets.QPushButton(Dialog)
+        self.btDefaults.setObjectName("btDefaults")
+        self.gridLayout.addWidget(self.btDefaults, 1, 1, 1, 1)
 
         self.retranslateUi(Dialog)
         self.tabWidget.setCurrentIndex(0)
@@ -205,7 +208,6 @@ class Ui_Dialog(object):
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Konfiguration"))
-        self.btReset.setText(_translate("Dialog", "Reset"))
         self.labTransparency.setText(_translate("Dialog", "15%"))
         self.label_2.setText(_translate("Dialog", "Transparenz Kamerasymbol"))
         self.labCountdown.setText(_translate("Dialog", "3s"))
@@ -255,7 +257,7 @@ class Ui_Dialog(object):
 "%H - Stunde als 00 .. 23<br>\n"
 "%M - Minute als 00 .. 59<br>\n"
 "%S - Sekunde als 00 .. 59</p></body></html>"))
-        self.lineUsbPath.setText(_translate("Dialog", "fotobox"))
+        self.lineUsbPath.setText(_translate("Dialog", "%Y-%m-%d_fotobox"))
         self.lineUsbFilename.setToolTip(_translate("Dialog", "<html><head/><body><p>Platzhalter im String (Auswahl):<br>\n"
 "%Y - Jahr als 2019<br>\n"
 "%y - Jahr als 19<br>\n"
@@ -269,6 +271,8 @@ class Ui_Dialog(object):
         self.label_10.setText(_translate("Dialog", "Icongröße kleine Knöpfe"))
         self.label_9.setText(_translate("Dialog", "Touchgröße kleine Knöpfe"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.gui), _translate("Dialog", "GUI"))
+        self.btReset.setText(_translate("Dialog", "Reset Fotobox"))
+        self.btDefaults.setText(_translate("Dialog", "Standardwerte"))
 
 
 if __name__ == "__main__":

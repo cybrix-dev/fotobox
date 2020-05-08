@@ -33,8 +33,12 @@ class Config(QObject):
         self.ui = ui()
         self.ui.setupUi(self.dialog)
 
-        if not isSystem:
+        if isSystem:
+            self.ui.btReset.clicked.connect(self.slot_reset)
+            self.ui.btDefaults.clicked.connect(self.slot_restore_defaults)
+        else:                        
             self.ui.btReset.hide()
+            self.ui.btDefaults.hide()
             count = self.ui.tabWidget.count()
             for i in range(count-1, 0, -1):
                 if self.ui.tabWidget.tabText(i) != "Anwender":
@@ -49,7 +53,6 @@ class Config(QObject):
         self.ui.slideCountdown.valueChanged.connect(self.slot_slide_countdown_changed)
         self.ui.slideTransparency.valueChanged.connect(self.slot_slide_transparency_changed)
         self.ui.buttonBox.accepted.connect(self.slot_new_config)
-        self.ui.btReset.clicked.connect(self.slot_reset)
 
         for item in camMemory:
             self.ui.comboCameraMemory.addItem(item)
@@ -228,10 +231,14 @@ class Config(QObject):
         # trigger update in user-objects
         self.sig_finished.emit()
 
-
     def slot_reset(self):
         self.store_to_file()
         self.sig_reset.emit()
+        
+    def slot_restore_defaults(self):
+        self.load_defaults()
+        self.handle_gui(True)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
