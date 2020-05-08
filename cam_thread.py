@@ -21,6 +21,7 @@ class Threading(QThread):
 
     sig_live_view = pyqtSignal(object)
     sig_photo = pyqtSignal(object)
+    sig_error = pyqtSignal(object)
 
     def __init__(self, parent, expected_memory):
         QThread.__init__(self, parent)
@@ -75,7 +76,11 @@ class Threading(QThread):
             elif state == Action.CAPTURE:
                 # einmal Foto machen und an GUI senden
                 # danach warten bis weiter
-                self.sig_photo.emit(self.cam.capture_image())
+                photo = self.cam.capture_image()
+                if self.cam.last_image:
+                    self.sig_photo.emit(photo)
+                else:
+                    self.sig_error.emit(photo)
                 self.available_space = self.cam.get_available_space()
                 state = Action.NONE
             elif state == Action.STORE:
