@@ -5,6 +5,7 @@ from PyQt5.QtCore import pyqtSignal, Qt, QObject, QSettings
 from PyQt5.QtWidgets import QDialog, QApplication
 
 import sys
+from PyQt5.Qt import QPixmap
 
 
 def checkbox_style_sheet(size):
@@ -19,26 +20,30 @@ def checkbox_style_sheet(size):
         margin: -24px -12px;
     }'''
     
-    return str(checkBoxStyleSheet).format(size=40, open="{", close="}")
+    return str(checkBoxStyleSheet).format(size=size, open="{", close="}")
 
 class Config(QObject):
 
     sig_finished = pyqtSignal()
     sig_reset = pyqtSignal()
 
-    def __init__(self, parent, iniFilename, isSystem, camMemory=["SD"]):
+    def __init__(self, parent, iniFilename, is_system):
         super().__init__(parent)
 
         self.dialog = QDialog(parent)
         self.ui = ui()
         self.ui.setupUi(self.dialog)
 
-        if isSystem:
+        self.system_config = is_system
+        if is_system:
             self.ui.btReset.clicked.connect(self.slot_reset)
             self.ui.btDefaults.clicked.connect(self.slot_restore_defaults)
         else:                        
             self.ui.btReset.hide()
             self.ui.btDefaults.hide()
+            self.ui.labCamSpaceType.hide()
+            self.ui.labCamSpace.hide()
+            self.ui.labCamSpaceIcon.hide()
             count = self.ui.tabWidget.count()
             for i in range(count-1, 0, -1):
                 if self.ui.tabWidget.tabText(i) != "Anwender":
@@ -52,14 +57,29 @@ class Config(QObject):
 
         self.ui.slideCountdown.valueChanged.connect(self.slot_slide_countdown_changed)
         self.ui.slideTransparency.valueChanged.connect(self.slot_slide_transparency_changed)
+        self.ui.spinCriticalMemory.valueChanged.connect(self.slot_critical_memory_value_changed)
+        self.ui.spinLowMemory.valueChanged.connect(self.slot_low_memory_value_changed)
         self.ui.buttonBox.accepted.connect(self.slot_new_config)
-
-        for item in camMemory:
-            self.ui.comboCameraMemory.addItem(item)
 
         self.filename = iniFilename
         self.load_defaults()
         self.load_from_file()
+
+    def set_space_icon(self, label, free_space):
+        if free_space <= self.critical_space:
+            icon = QPixmap(const.IMG_ERR)
+        elif free_space <= self.low_space:
+            icon = QPixmap(const.IMG_WARN)
+        else:
+            icon = False
+        
+        if not icon:
+            label.hide()
+        else:
+            label.setText("")
+            label.setPixmap(icon.scaled(label.width(),
+                                        label.height(),
+                                        Qt.KeepAspectRatioByExpanding))
 
     def show_gui(self):
         self.dialog.showFullScreen()
@@ -79,7 +99,8 @@ class Config(QObject):
         self.usb_path = "fotobox"
         self.usb_file_string = "%Y-%m-%d_%H-%M-%S.jpg"
 
-        self.critical_space = 100000  # in KB - 100MB
+        self.low_space = 100000  # in KB - 100MB
+        self.critical_space = 10000  # in KB - 10MB
         self.bist_interval = 5000  # memcheck interval in ms - 5s
 
         self.camera_memory = "SD"
@@ -107,7 +128,8 @@ class Config(QObject):
                 settings.setValue(name, str(value))
             return value
         
-        settings.beginGroup("General")
+        settings.beginGroup("general")
+        self.low_space = handle_value(settings, "low_space", self.low_space, load)
         self.critical_space = handle_value(settings, "critical_space", self.critical_space, load)
         settings.endGroup()  # General
                 
@@ -161,6 +183,11 @@ class Config(QObject):
 
         self.countdown = handle_value(self.ui.slideCountdown, self.countdown, load)
         
+        # low space internally in KB but config GUI in MB
+        low_space_mb = self.low_space // 1000
+        low_space_mb = handle_value(self.ui.spinLowMemory, low_space_mb, load)
+        self.low_space = low_space_mb * 1000
+        
         # critical space internally in KB but config GUI in MB
         critical_space_mb = self.critical_space // 1000
         critical_space_mb = handle_value(self.ui.spinCriticalMemory, critical_space_mb, load)
@@ -206,7 +233,21 @@ class Config(QObject):
     def store_to_file(self):
         self.handle_config_file(False)
 
-    def open_config(self):
+    def open_config(self, usb_space, cam_space, cam_memory):
+        
+        # fill start-page
+        self.ui.labUsbSpace.setText(str("{} MB").format(usb_space // 1000))
+        self.set_space_icon(self.ui.labUsbSpaceIcon, usb_space)
+
+        for item in cam_memory:
+            self.ui.comboCameraMemory.addItem(item)
+        
+        if self.system_config:
+
+            self.ui.labCamSpaceType.setText(str("Platz auf Kamera ({})").format(self.camera_memory))
+            self.ui.labCamSpace.setText(str("{} MB").format(cam_space // 1000))
+            self.set_space_icon(self.ui.labCamSpaceIcon, cam_space)
+            
         # assign current config to GUI
         self.handle_gui(True)
         self.show_gui()
@@ -217,6 +258,14 @@ class Config(QObject):
 
     def slot_slide_countdown_changed(self, value):
         self.ui.labCountdown.setText(str(value) + "s")
+
+    def slot_low_memory_value_changed(self, value):
+        if value < self.ui.spinCriticalMemory.value():
+            self.ui.spinCriticalMemory.setValue(value)
+
+    def slot_critical_memory_value_changed(self, value):
+        if value > self.ui.spinLowMemory.value():
+            self.ui.spinLowMemory.setValue(value)
 
     def slot_new_config(self):
         # assign all new values
@@ -244,5 +293,5 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     MainWindow = QDialog()
     config = Config(MainWindow, const.INI_FILE, True)
-    config.open_config()
+    config.open_config(50000,50000, ["SD", "internal memory"])
     sys.exit(app.exec_())

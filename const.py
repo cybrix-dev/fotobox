@@ -19,16 +19,18 @@ IMG_CK_OFF = IMG_PATH + "/checkbox_checked.png"
 IMG_CK_ON = IMG_PATH + "/checkbox_unchecked.png"
 IMG_ABORT = IMG_PATH + "/abort_trash.png"
 IMG_WARN  = IMG_PATH + "/attention.png"
-IMG_ERR   = IMG_PATH + "/attention.png"
+IMG_ERR   = IMG_PATH + "/error.png"
 IMG_CAM   = IMG_PATH + "/camwhite.png"
 IMG_GEAR  = IMG_PATH + "/config_gear.png"
 IMG_OK    = IMG_PATH + "/okay.png"
 
 IMG_SD          = IMG_PATH + "/sd_card.png"
-IMG_SD_FULL     = IMG_PATH + "/sd_warning.png"
+IMG_SD_LOW      = IMG_PATH + "/sd_warning.png"
+IMG_SD_FULL     = IMG_PATH + "/sd_error.png"
 IMG_SD_MISSING  = IMG_PATH + "/sd_missing.png"
 IMG_USB         = IMG_PATH + "/usb_stick.png"
-IMG_USB_FULL    = IMG_PATH + "/usb_warning.png"
+IMG_USB_LOW     = IMG_PATH + "/usb_warning.png"
+IMG_USB_FULL    = IMG_PATH + "/usb_error.png"
 IMG_USB_MISSING = IMG_PATH + "/usb_missing.png"
 
 CHECKBOX_SIZE = 40  # Groesse der Checkboxen im Config-Menue
@@ -47,5 +49,6 @@ Status der Speicher
 '''
 MEMSTATE_INIT = -1
 MEMSTATE_OK = 0
-MEMSTATE_FULL = 1
-MEMSTATE_MISSING = 2
+MEMSTATE_LOW = 1
+MEMSTATE_FULL = 2
+MEMSTATE_MISSING = 3

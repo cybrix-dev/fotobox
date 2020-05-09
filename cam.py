@@ -1,5 +1,3 @@
-from PyQt5.QtCore import *
-from PyQt5.QtGui import QPixmap
 import logging
 
 try:
@@ -13,15 +11,22 @@ except:
 else:
     debug = False
 
+'''
+Indices in available memory-tuple
+'''
+MEM_NAME = 0
+MEM_SPACE_LEFT = 1
+MEM_INDEX = 2
 
 class Camera:
 
     def __init__(self, memory_type=None):
         if debug:
             print('debug')
-        logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.WARNING)
+        logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.INFO)
         self.last_image = False
         self.memory_type = memory_type
+        
         if debug:
             self.index = 0
         else:
@@ -35,6 +40,11 @@ class Camera:
             # get configuration tree
             config = gp.check_result(gp.gp_camera_get_config(self.cam))
             
+        self.available_memory = []
+        self.load_available_memory(True)
+        
+        #now comes the configuration which depends on the camera used
+        if not debug:
             # find the image format config item
             # camera dependent - 'imageformat' is 'imagequality' on some
             OK, image_format = gp.gp_widget_get_child_by_name(config, 'imageformat')
@@ -56,10 +66,16 @@ class Camera:
                 gp.check_result(gp.gp_camera_set_config(self.cam, config))
                 
             # set storage folder+file - TODO: depending on memory_type
+            capture_target = 1
+            for mem in self.available_memory:
+                if mem[MEM_NAME] == memory_type:
+                    capture_target = mem[MEM_INDEX]
+                    break
+                
             OK, capture_target_class = gp.gp_widget_get_child_by_name( config, 'capturetarget')
             if OK >= gp.GP_OK:
                 # set value
-                value = gp.check_result(gp.gp_widget_get_choice(capture_target_class, 1))
+                value = gp.check_result(gp.gp_widget_get_choice(capture_target_class, capture_target))
                 gp.check_result(gp.gp_widget_set_value(capture_target_class, value))
                 # set config
                 gp.check_result(gp.gp_camera_set_config(self.cam, config))
@@ -142,24 +158,38 @@ class Camera:
         print("freeimages:    ", mem.freeimages)
         print("fields:        ", mem.fields)
 
-    def get_available_space(self, print_info=False):
+    def get_available_space(self):
+        result = -1
+        for mem in self.available_memory:
+            if mem[MEM_NAME] == self.memory_type:
+                result = mem[MEM_SPACE_LEFT]
+                break
+                
+        return result
+    
+    def load_available_memory(self, print_info=False):
         if debug:
-            result = 50000
+            result = [("SD", 50000, 1)]
         else:
-            result = -1
+            result = []
+            idx = 1
             arr = gp.check_result(gp.gp_camera_get_storageinfo(self.cam))
             for mem in arr:
                 if print_info:
                     self.print_mem_device(mem)
-                if mem.description == self.memory_type:
-                    result = mem.freekbytes
-                    break
+                result.append((mem.description, mem.freekbytes, idx))
+                idx += 1
                 
-        return result
+        self.available_memory = result
+            
 
         
 if __name__ == "__main__":
-    cam = Camera()
+    cam = Camera("SD")
+    
+    print(cam.available_memory)
+    print(cam.get_available_space())
+    
     cam.capture_image()
     cam.dismiss_last()
     cam.capture_image()

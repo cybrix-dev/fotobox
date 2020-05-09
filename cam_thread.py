@@ -28,7 +28,7 @@ class Threading(QThread):
         self.cam = Camera()
         self.cam.set_memory_type(expected_memory)
         self.cmd_fifo = queue.Queue()
-        self.available_space = self.cam.get_available_space(True)
+        self.available_space = self.cam.get_available_space()
         self.filename = ""
 
     def sendThreadCommand(self,cmd):

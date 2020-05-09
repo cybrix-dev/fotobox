@@ -31,7 +31,7 @@ class Box(QObject):
     classdocs
     '''
 
-    def __init__(self, parent, config):
+    def __init__(self, parent, config_mode):
 
         '''
         Constructor
@@ -39,7 +39,7 @@ class Box(QObject):
         super().__init__(parent)
 
         # TODO: extract parameter for system-config from CLI-parameters
-        self.config = Config(parent, const.INI_FILE, config)
+        self.config = Config(parent, const.INI_FILE, config_mode)
         self.ui = ui()
         self.ui.setupUi(parent)
 
@@ -47,6 +47,9 @@ class Box(QObject):
         self.preview = QPixmap()
         self.sdState = const.MEMSTATE_INIT
         self.usbState = const.MEMSTATE_INIT
+        self.usb_space = -1
+        self.cam_space = -1
+        self.cam_memory = []
 
         '''
         Timer initialisieren
@@ -62,10 +65,10 @@ class Box(QObject):
         '''
         nur als Abbbruch bei Bildern
         '''
-        self.set_button_imgage(self.ui.btConfig, const.IMG_GEAR)
-        self.set_button_imgage(self.ui.btAbbruch, const.IMG_ABORT)
-        self.set_button_imgage(self.ui.btAccept, const.IMG_OK)
-        self.set_button_imgage(self.ui.btTrigger, const.IMG_CAM)
+        self.set_button_image(self.ui.btConfig, const.IMG_GEAR)
+        self.set_button_image(self.ui.btAbbruch, const.IMG_ABORT)
+        self.set_button_image(self.ui.btAccept, const.IMG_OK)
+        self.set_button_image(self.ui.btTrigger, const.IMG_CAM)
         self.ui.btAbbruch.hide()
 
         '''
@@ -89,12 +92,16 @@ class Box(QObject):
 
         # setup camera + camera-thread
         self.thread = Threading(parent, self.config.camera_memory)
+        
+        for mem in self.thread.cam.available_memory:
+            self.cam_memory.append(mem[0])
 
         self.thread.sig_live_view.connect(self.slot_preview)
         self.thread.sig_photo.connect(self.slot_image)
         self.thread.sig_error.connect(self.slot_error_preview)
         
         self.usbOutputPath = ""
+        
         self.check_memory()
 
         # start, will also start threading
@@ -134,7 +141,7 @@ class Box(QObject):
                   int(height * self.config.knob_icon_factor)))
 
 
-    def set_button_imgage(self, button, filename, opacity=1):
+    def set_button_image(self, button, filename, opacity=1):
         '''
         - wenn kein Dateiname, dann Knopf verstecken
         - Setze Bild fuer Knopf/Anpassen der Groesse
@@ -173,11 +180,13 @@ class Box(QObject):
         - SD vorhanden
         - SD genug Platz
         '''
-        sd_space = self.thread.get_available_space()
-        if sd_space < 0:
+        self.cam_space = self.thread.get_available_space()
+        if self.cam_space < 0:
             result = const.MEMSTATE_MISSING
-        elif sd_space <= self.config.critical_space:
+        elif self.cam_space <= self.config.critical_space:
             result = const.MEMSTATE_FULL
+        elif self.cam_space <= self.config.low_space:
+            result = const.MEMSTATE_LOW
         else:
             result = const.MEMSTATE_OK
             
@@ -195,17 +204,23 @@ class Box(QObject):
             out = self.config.usb_root.encode() + b"/usb-stick 50000"
 
         self.usb_dir = False
+        self.usb_space = -1
         for line in out.splitlines():
             line = line.decode()
             if self.config.usb_root in line:
                 self.usb_dir, availableSpace = line.split()
+                self.usb_space = int(availableSpace)
                 self.usb_dir = self.usb_dir + "/"
                 break
 
+        
+
         if not self.usb_dir:
             return const.MEMSTATE_MISSING
-        elif int(availableSpace) <= self.config.critical_space:
+        elif self.usb_space <= self.config.critical_space:
             return const.MEMSTATE_FULL
+        elif self.usb_space <= self.config.low_space:
+            return const.MEMSTATE_LOW
         else:
             return const.MEMSTATE_OK
 
@@ -233,26 +248,30 @@ class Box(QObject):
             
             if usbState == const.MEMSTATE_OK:
                 img = False
+            elif usbState == const.MEMSTATE_LOW:
+                img = const.IMG_USB_LOW
             elif usbState == const.MEMSTATE_FULL:
                 img = const.IMG_USB_FULL
             elif usbState == const.MEMSTATE_MISSING:
                 img = const.IMG_USB_MISSING
             else:
                 img = const.IMG_USB
-            self.set_button_imgage(self.ui.btUsb, img)
+            self.set_button_image(self.ui.btUsb, img)
             self.usbState = usbState
 
         sdState = self.check_sd_state()
         if sdState != self.sdState:
             if sdState == const.MEMSTATE_OK:
                 img = False
+            elif sdState == const.MEMSTATE_LOW:
+                img = const.IMG_SD_LOW
             elif sdState == const.MEMSTATE_FULL:
                 img = const.IMG_SD_FULL
             elif sdState == const.MEMSTATE_MISSING:
                 img = const.IMG_SD_MISSING
             else:
                 img = const.IMG_SD
-            self.set_button_imgage(self.ui.btSd, img)
+            self.set_button_image(self.ui.btSd, img)
             self.sdState = sdState
 
     def changeState(self, state):
@@ -319,7 +338,7 @@ class Box(QObject):
 
     def show_trigger(self, show):
         if show:
-            self.set_button_imgage(self.ui.btTrigger, const.IMG_CAM, self.config.trigger_opacity)
+            self.set_button_image(self.ui.btTrigger, const.IMG_CAM, self.config.trigger_opacity)
         else:
             # hide can not be used, this button is also a spacer
             self.ui.btTrigger.setText("")
@@ -388,7 +407,7 @@ class Box(QObject):
         Knopf:
         - Konfiguration/Debug
         '''
-        self.config.open_config()
+        self.config.open_config(self.usb_space, self.cam_space, self.cam_memory)
 
     def slot_preview(self, image):
         '''
