@@ -1,4 +1,4 @@
 [Desktop Entry]
 Type=Appliction
-Exec=/home/pi/fotobox/autostart
+Exec=/home/pi/fotobox/start_box
 Terminal=true
