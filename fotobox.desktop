@@ -1,4 +1,4 @@
 [Desktop Entry]
 Type=Appliction
-Exec=/home/pi/fotobox/start_box
+Exec=/home/pi/fotobox/fotobox
 Terminal=true
