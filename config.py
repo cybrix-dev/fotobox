@@ -77,9 +77,10 @@ class Config(QObject):
             label.hide()
         else:
             label.setText("")
-            label.setPixmap(icon.scaled(label.width(),
+            # use a square of the height
+            label.setPixmap(icon.scaled(label.height(),
                                         label.height(),
-                                        Qt.KeepAspectRatioByExpanding))
+                                        Qt.KeepAspectRatio))
 
     def show_gui(self):
         self.dialog.showFullScreen()
