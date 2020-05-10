@@ -120,27 +120,29 @@ class Config(QObject):
         '''
         settings = QSettings(self.filename, QSettings.IniFormat)
 
-        def handle_value(settings, name, value, load):
+        def handle_value(settings, name, value, load, user_parameter=False):
             if load:
                 tmp_value = settings.value(name, value)
                 value = type(value)(tmp_value)
-            else:
+            elif user_parameter or self.system_config:
+                # always store user-parameters
+                # only store system-parameters in system-mode 
                 settings.setValue(name, str(value))
             return value
         
-        settings.beginGroup("general")
+        settings.beginGroup("Global")
         self.low_space = handle_value(settings, "low_space", self.low_space, load)
         self.critical_space = handle_value(settings, "critical_space", self.critical_space, load)
-        settings.endGroup()  # General
+        settings.endGroup()
                 
         settings.beginGroup("GUI")
         self.image_mirrored = handle_value(settings, "image_mirrored", self.image_mirrored, load)
         self.knob_resize_factor = handle_value(settings, "knob_resize", self.knob_resize_factor, load)
         self.knob_icon_factor = handle_value(settings, "knob_icon", self.knob_icon_factor, load)
-        self.trigger_opacity = handle_value(settings, "trigger_opacity", self.trigger_opacity, load)
+        self.trigger_opacity = handle_value(settings, "trigger_opacity", self.trigger_opacity, load, True)
         
         stretch_image = (self.image_resize_type == Qt.KeepAspectRatioByExpanding)
-        stretch_image = handle_value(settings, "stretch_image", stretch_image, load)
+        stretch_image = handle_value(settings, "stretch_image", stretch_image, load, True)
         if stretch_image:
             self.image_resize_type = Qt.KeepAspectRatioByExpanding
         else:
@@ -152,7 +154,7 @@ class Config(QObject):
         settings.endGroup()  # Camera
 
         settings.beginGroup("Timer")
-        self.countdown = handle_value(settings, "countdown", self.countdown, load)
+        self.countdown = handle_value(settings, "countdown", self.countdown, load, True)
         self.bist_interval = handle_value(settings, "bist_interval", self.bist_interval, load)
         settings.endGroup()  # Timer
 
@@ -281,7 +283,7 @@ class Config(QObject):
         self.sig_finished.emit()
 
     def slot_reset(self):
-        self.store_to_file()
+        self.slot_new_config()
         self.sig_reset.emit()
         
     def slot_restore_defaults(self):
