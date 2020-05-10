@@ -213,8 +213,6 @@ class Box(QObject):
                 self.usb_dir = self.usb_dir + "/"
                 break
 
-        
-
         if not self.usb_dir:
             return const.MEMSTATE_MISSING
         elif self.usb_space <= self.config.critical_space:
