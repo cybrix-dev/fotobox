@@ -440,7 +440,7 @@ class Box(QObject):
         self.changeState(self.state)
         
     def slot_config_reset(self):
-        QApplication.exit(-1) 
+        QApplication.exit(1) 
 
 class CliParser:
     def __init__(self,app):
@@ -473,14 +473,16 @@ def start_gui(argv):
     parser = CliParser(app)
 
     mainWindow = MainWindowB()
-    Box(mainWindow, parser.is_config_mode())
+    box = Box(mainWindow, parser.is_config_mode())
 
     if not parser.is_mouse_cursor():
         # disable mouse-cursor
         app.setOverrideCursor(Qt.BlankCursor)
 
     mainWindow.show()
-    return app.exec_()
+    result = app.exec_()
+    box.thread.stop_thread()
+    return result
 
 
 if __name__ == "__main__":

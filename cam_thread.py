@@ -25,8 +25,7 @@ class Threading(QThread):
 
     def __init__(self, parent, expected_memory):
         QThread.__init__(self, parent)
-        self.cam = Camera()
-        self.cam.set_memory_type(expected_memory)
+        self.cam = Camera(expected_memory)
         self.cmd_fifo = queue.Queue()
         self.available_space = self.cam.get_available_space()
         self.filename = ""
@@ -60,6 +59,8 @@ class Threading(QThread):
 
     def stop_thread(self):
         self.sendThreadCommand(Action.TERMINATE)
+        while self.isRunning():
+            self.yieldCurrentThread()
 
     def run(self):
         state = const.STATE_LIVE
@@ -107,7 +108,7 @@ class Threading(QThread):
 if __name__ == "__main__":
     import sys
     app = QCoreApplication(sys.argv)
-    thread = Threading(None)
+    thread = Threading(None, "SD")
     thread.finished.connect(app.exit)
 
     thread.start_live()

@@ -6,3 +6,4 @@ if [ $? -ne 0 ]; then
 	echo reboot
 	# reboot
 fi
+exit(0)
