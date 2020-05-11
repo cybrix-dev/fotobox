@@ -71,16 +71,13 @@ class Config(QObject):
         elif free_space <= self.low_space:
             icon = QPixmap(const.IMG_WARN)
         else:
-            icon = False
+            icon = QPixmap(const.IMG_OK)
         
-        if not icon:
-            label.hide()
-        else:
-            label.setText("")
-            # use a square of the height
-            label.setPixmap(icon.scaled(label.height(),
-                                        label.height(),
-                                        Qt.KeepAspectRatio))
+        label.setText("")
+        # use a square of the height
+        label.setPixmap(icon.scaled(label.height(),
+                                    label.height(),
+                                    Qt.KeepAspectRatio))
 
     def show_gui(self):
         self.dialog.showFullScreen()
