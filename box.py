@@ -2,6 +2,7 @@
 Contains the complete GUI-handling.
 '''
 import const
+import logs
 from main_gui import Ui_MainWindow as ui
 from cam_thread import Threading
 from config import Config
@@ -15,6 +16,7 @@ import subprocess
 import os
 import time
 import sys
+import logging
 
 
 class MainWindowB(QMainWindow):
@@ -22,6 +24,8 @@ class MainWindowB(QMainWindow):
     sigResize = pyqtSignal()
 
     def resizeEvent(self, *args, **kwargs):
+        log = logs.logger.add_module("MainWindowB")
+        log.info("Resize")
         self.sigResize.emit()
         return QMainWindow.resizeEvent(self, *args, **kwargs)
 
@@ -31,8 +35,10 @@ class Box(QObject):
     classdocs
     '''
 
-    def __init__(self, parent, config_mode):
-
+    def __init__(self, parent, config_mode, log_level=logging.INFO):
+        self.log = logs.logger.add_module("Box")
+        self.log.warning("__init__(config_mode=%a, log_level=%a)", config_mode, log_level)
+        logs.logger.change_level(log_level)
         '''
         Constructor
         '''
@@ -40,20 +46,29 @@ class Box(QObject):
 
         # TODO: extract parameter for system-config from CLI-parameters
         self.config = Config(parent, const.INI_FILE, config_mode)
+        
+        self.log.info("ui()")
         self.ui = ui()
+        self.log.info("ui.setupUi()")
         self.ui.setupUi(parent)
 
+        self.log.info("update_gui_elements()")
         self.update_gui_elements()
+        
+        self.log.debug("initialize members")
         self.preview = QPixmap()
         self.sdState = const.MEMSTATE_INIT
         self.usbState = const.MEMSTATE_INIT
         self.usb_space = -1
         self.cam_space = -1
         self.cam_memory = []
+        self.state = const.STATE_INIT
 
         '''
         Timer initialisieren
         '''
+        self.log.debug("Setup timers")
+
         # fuer slot_bist
         self.timer_bist = QTimer(parent)
         self.timer_bist.setInterval(self.config.bist_interval)
@@ -62,9 +77,11 @@ class Box(QObject):
         self.count_timer = QTimer(parent)
         self.count_timer.setInterval(1000)
         self.counter = 0
+        
         '''
-        nur als Abbbruch bei Bildern
+        Buttons mit Bildern
         '''
+        self.log.debug("Setup knob-icons")
         self.set_button_image(self.ui.btConfig, const.IMG_GEAR)
         self.set_button_image(self.ui.btAbbruch, const.IMG_ABORT)
         self.set_button_image(self.ui.btAccept, const.IMG_OK)
@@ -74,6 +91,7 @@ class Box(QObject):
         '''
         Signal/Slot-Verbindungen
         '''
+        self.log.debug("Setup SIGNAL/SLOTS")
         self.ui.btAccept.clicked.connect(self.slot_btAccept)
         self.ui.btTrigger.clicked.connect(self.slot_btTrigger)
         self.ui.btAbbruch.clicked.connect(self.slot_btAbbruch)
@@ -88,9 +106,12 @@ class Box(QObject):
         self.config.sig_reset.connect(self.slot_config_reset)
 
         parent.sigResize.connect(self.update_gui)
+        
+        self.log.debug("Display fullscreen for resizing")
         parent.showFullScreen()
 
         # setup camera + camera-thread
+        self.log.debug("Create Cam-thread")
         self.thread = Threading(parent, self.config.camera_memory)
         
         for mem in self.thread.cam.available_memory:
@@ -102,12 +123,14 @@ class Box(QObject):
         
         self.usbOutputPath = ""
         
+        self.log.debug("Check memory")
         self.check_memory()
 
         # start, will also start threading
         self.changeState(const.STATE_LIVE)
         
     def update_gui_elements(self):
+        self.log.debug("update_gui_elements()")
         self.initialize_button(self.ui.btSd)
         self.initialize_button(self.ui.btUsb)
         self.initialize_button(self.ui.btConfig)
@@ -115,6 +138,7 @@ class Box(QObject):
         self.initialize_button(self.ui.btAccept)
 
     def update_gui(self):
+        self.log.debug("update_gui()")
         self.ui.gui.setGeometry(self.ui.centralwidget.geometry())
         self.ui.bild.setGeometry(self.ui.centralwidget.geometry())
         self.ui.lblZahl.setGeometry(self.ui.centralwidget.geometry())
@@ -124,6 +148,7 @@ class Box(QObject):
         self.ui.gui.raise_()
 
     def initialize_button(self, button):
+        self.log.debug("initialize button()")
         '''
         Resizing
         '''
@@ -133,7 +158,7 @@ class Box(QObject):
         button.setFixedSize(size)
 
         
-    def resize_button(self, button):
+    def resize_button_icon(self, button):
         width = button.width()
         height = button.height()
         button.setIconSize(
@@ -165,7 +190,7 @@ class Box(QObject):
             else:
                 icon = QIcon(filename)
             button.setIcon(icon)
-            self.resize_button(button)
+            self.resize_button_icon(button)
             # 10% vom Rand platz
             button.show()
 
@@ -242,7 +267,7 @@ class Box(QObject):
                     try:
                         os.makedirs(self.usbOutputPath)
                     except:
-                        print("Path could not be created: ", self.usbOutputPath)
+                        self.log.warning("Path could not be created: " + self.usbOutputPath)
             
             if usbState == const.MEMSTATE_OK:
                 img = False
@@ -278,6 +303,7 @@ class Box(QObject):
         - nur anzeigen, was gebraucht wird
         - Status von SD/USB bleibt
         '''
+        self.log.debug("Change state: %a -> %a", self.state, state)
         self.ui.lblZahl.hide()
 
         self.show_trigger(False)
@@ -369,7 +395,7 @@ class Box(QObject):
         - zurueck zu LiveView
         '''
         if not self.usb_dir:
-            print("USB nicht verfuegbar")
+            self.log.error("USB nicht verfuegbar")
         else:
             filename = self.usbOutputPath + "/" + time.strftime(self.config.usb_file_string)
             self.thread.store_last(filename)
@@ -412,7 +438,7 @@ class Box(QObject):
         Receiver-slot fuer Liveview (nur im RAM)
         '''
         self.showImage(image)
-        self.resize_button(self.ui.btTrigger)
+        self.resize_button_icon(self.ui.btTrigger)
         
     def slot_error_preview(self, image):
         '''
@@ -444,7 +470,7 @@ class Box(QObject):
 
 class CliParser:
     def __init__(self,app):
-
+        self.log = logs.logger.add_module("CliParser")
         QApplication.setApplicationName("fotobox");
         QApplication.setApplicationVersion("1.0");
 
@@ -453,11 +479,14 @@ class CliParser:
         self.parser.addHelpOption()
         self.parser.addVersionOption()
 
-        self.cursorOption = QCommandLineOption(["m", "mouse-cursor"], QCoreApplication.translate("main", "Show mouse-cursor."))
+        self.cursorOption = QCommandLineOption(["m", "mouse-cursor"], "Maus anzeigen")
         self.parser.addOption(self.cursorOption)
 
-        self.configOption = QCommandLineOption(["c", "config"], QCoreApplication.translate("main", "Allow system-configuration."))
+        self.configOption = QCommandLineOption(["c", "config"], "Systemkonfiguration setzen")
         self.parser.addOption(self.configOption)
+
+        self.loggingOption = QCommandLineOption(["log"], "Logging aktivieren", "level", "INFO")
+        self.parser.addOption(self.loggingOption)
 
         self.parser.process(app)
 
@@ -466,22 +495,35 @@ class CliParser:
 
     def is_config_mode(self):
         return self.parser.isSet(self.configOption)
+    
+    def log_level(self):
+        return self.parser.value(self.loggingOption).lower()
 
 def start_gui(argv):
+    log = logs.logger.add_module("start_gui")
     app = QApplication(argv)
 
+    log.debug("Parser")
     parser = CliParser(app)
 
+    log.debug("MainWindowB")
     mainWindow = MainWindowB()
-    box = Box(mainWindow, parser.is_config_mode())
+    
+    log.debug("Box")
+    box = Box(mainWindow, parser.is_config_mode(), parser.log_level().upper())
 
     if not parser.is_mouse_cursor():
         # disable mouse-cursor
+        log.debug("Set mouse")
         app.setOverrideCursor(Qt.BlankCursor)
 
+    log.debug("Show screen")
     mainWindow.show()
+    log.debug("Start")
     result = app.exec_()
+    log.info("Terminate thread")
     box.thread.stop_thread()
+    log.warning(str("End with result {}").format(result))
     return result
 
 
@@ -492,5 +534,5 @@ if __name__ == "__main__":
     ch.setLevel(logging.DEBUG)
 
     result = start_gui(sys.argv)
-    print("Result: ", result)
+    logging.critical("Result: %a", result)
     sys.exit(result)

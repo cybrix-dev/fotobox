@@ -1,9 +1,10 @@
 import sys
 import time
 import box
+import logging
 
 # start of main
-print("__main__ calling")
+logging.info("__main__ calling")
 res = -1
 while res != 0:
     start_time = time.time()
@@ -15,4 +16,6 @@ while res != 0:
     if (res < 0) and (stop_time < (start_time + 10)):
         # serious bug, we just can just stop the application
         res = 0
-        print("Fast error. Try calling box.py directly for more information")
+        logging.critical("Fast error. Try calling box.py directly for more information")
+    else:
+        logging.error(str("Restart with result {}").format(res))

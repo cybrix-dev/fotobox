@@ -1,9 +1,14 @@
 import const
 import queue
+import logs
 from cam import Camera
+
 from PyQt5.QtCore import (QCoreApplication, QObject, QRunnable, QThread,
                           QThreadPool, pyqtSignal)
+
 from enum import Enum
+
+import logging
 import time
 
 
@@ -24,6 +29,7 @@ class Threading(QThread):
     sig_error = pyqtSignal(object)
 
     def __init__(self, parent, expected_memory):
+        self.log = logs.logger.add_module("Threading")
         QThread.__init__(self, parent)
         self.cam = Camera(expected_memory)
         self.cmd_fifo = queue.Queue()
@@ -39,30 +45,36 @@ class Threading(QThread):
         '''
         Startet die Vorschau. Daten werden via sig_live_view gesendet
         '''
+        self.log.debug("Start liveview")
         self.sendThreadCommand(Action.PREVIEW)
 
     def capture_image(self):
         '''
         Erstellt Foto. Daten werden via sig_foto gesendet
         '''
+        self.log.debug("Capture image")
         self.sendThreadCommand(Action.CAPTURE)
 
     def get_available_space(self):
         return self.available_space
 
     def store_last(self, filename):
+        self.log.debug("Store image")
         self.filename = filename
         self.sendThreadCommand(Action.STORE)
 
     def dismiss_last(self):
+        self.log.debug("Delete image")
         self.sendThreadCommand(Action.DISMISS)
 
     def stop_thread(self):
         self.sendThreadCommand(Action.TERMINATE)
         while self.isRunning():
             self.yieldCurrentThread()
+        self.log.info("Thread terminated")
 
     def run(self):
+        self.log.info("Thread started")
         state = const.STATE_LIVE
         ts = 0
         while True:
@@ -107,17 +119,31 @@ class Threading(QThread):
 
 if __name__ == "__main__":
     import sys
+    logs.logger.change_level(logging.DEBUG)
+    
+    logging.info("QCoreApplication")
     app = QCoreApplication(sys.argv)
+    logging.info("Threading()")
     thread = Threading(None, "SD")
+    logging.info("finished.connect()")
     thread.finished.connect(app.exit)
 
+    logging.info("thread.start_live()")
     thread.start_live()
+    logging.info("thread.capture_image()")
     thread.capture_image()
+    logging.info("thread.dismiss_last()")
     thread.dismiss_last()
+    logging.info("thread.start_live()")
     thread.start_live()
+    logging.info("thread.capture_image()")
     thread.capture_image()
+    logging.info("thread.store_last(\"./test.jpg\")")
     thread.store_last("./test.jpg")
+    logging.info("thread.start_live()")
     thread.start_live()
+    logging.info("thread.stop_thread()")
     thread.stop_thread()
 
+    logging.info("sys.exit(app.exec_())")
     sys.exit(app.exec_())
