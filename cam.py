@@ -30,6 +30,7 @@ class Camera:
         self.last_image = False
         self.memory_type = memory_type
         self.last_image = None
+        self.last_preview = None
         
         self.last_success = False
         self.error_count = 0
@@ -137,10 +138,10 @@ class Camera:
         else:
             next_image = self.check_success(gp.gp_camera_capture_preview(self.cam), "Preview", True)
             if self.last_success:
-                self.last_image = next_image
+                self.last_preview = next_image
                 
             # capture preview image (not saved to camera memory card)
-            return self.prepare_pixmap(self.last_image)
+            return self.prepare_pixmap(self.last_preview)
 
     def capture_image(self):
         self.last_image = True
