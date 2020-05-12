@@ -91,7 +91,7 @@ class Threading(QThread):
                 # einmal Foto machen und an GUI senden
                 # danach warten bis weiter
                 photo = self.cam.capture_image()
-                if self.cam.last_success:
+                if self.cam.last_image:
                     self.sig_photo.emit(photo)
                 else:
                     self.sig_error.emit(photo)
