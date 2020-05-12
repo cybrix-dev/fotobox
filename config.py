@@ -1,11 +1,14 @@
 import const
+import logs
 from config_gui import Ui_Dialog as ui
 
 from PyQt5.QtCore import pyqtSignal, Qt, QObject, QSettings  
 from PyQt5.QtWidgets import QDialog, QApplication
+from PyQt5.Qt import QPixmap
 
 import sys
-from PyQt5.Qt import QPixmap
+import logging
+from _operator import is_
 
 
 def checkbox_style_sheet(size):
@@ -28,8 +31,16 @@ class Config(QObject):
     sig_reset = pyqtSignal()
 
     def __init__(self, parent, iniFilename, is_system):
+        self.log = logs.logger.add_module("Config")
+        self.log.debug("__init__(iniFilename=%a, is_system=%a)", iniFilename, is_system)
+        if is_system:
+            config_name = "system"
+        else:
+            config_name = "user"
+        self.log.info("Start config with mode: %a", config_name)
+        
         super().__init__(parent)
-
+        
         self.dialog = QDialog(parent)
         self.ui = ui()
         self.ui.setupUi(self.dialog)
@@ -66,6 +77,7 @@ class Config(QObject):
         self.load_from_file()
 
     def set_space_icon(self, label, free_space):
+        self.log.debug("set_space_icon: %a", free_space)
         if free_space <= self.critical_space:
             icon = QPixmap(const.IMG_ERR)
         elif free_space <= self.low_space:
@@ -80,12 +92,15 @@ class Config(QObject):
                                     Qt.KeepAspectRatio))
 
     def show_gui(self):
+        self.log.info("show_gui")
         self.dialog.showFullScreen()
 
     def hide_gui(self):
+        self.log.info("hide_gui")
         self.dialog.hide()
         
     def load_defaults(self):
+        self.log.debug("load_defaults")
         # Anwender Tab
         self.trigger_opacity = 0.25
         self.countdown = 3  # countdown-timer in s - 3s
@@ -110,6 +125,7 @@ class Config(QObject):
 
 
     def handle_config_file(self, load):
+        self.log.debug("handle_config_file")
         '''
         Handles accessing the INI-file
         
@@ -118,7 +134,7 @@ class Config(QObject):
         '''
         settings = QSettings(self.filename, QSettings.IniFormat)
 
-        def handle_value(settings, name, value, load, user_parameter=False):
+        def handle_value(name, value, user_parameter=False):
             if load:
                 tmp_value = settings.value(name, value)
                 value = type(value)(tmp_value)
@@ -129,18 +145,18 @@ class Config(QObject):
             return value
         
         settings.beginGroup("Global")
-        self.low_space = handle_value(settings, "low_space", self.low_space, load)
-        self.critical_space = handle_value(settings, "critical_space", self.critical_space, load)
+        self.low_space = handle_value("low_space", self.low_space)
+        self.critical_space = handle_value("critical_space", self.critical_space)
         settings.endGroup()
                 
         settings.beginGroup("GUI")
-        self.image_mirrored = handle_value(settings, "image_mirrored", self.image_mirrored, load)
-        self.knob_resize_factor = handle_value(settings, "knob_resize", self.knob_resize_factor, load)
-        self.knob_icon_factor = handle_value(settings, "knob_icon", self.knob_icon_factor, load)
-        self.trigger_opacity = handle_value(settings, "trigger_opacity", self.trigger_opacity, load, True)
+        self.image_mirrored = handle_value("image_mirrored", self.image_mirrored)
+        self.knob_resize_factor = handle_value("knob_resize", self.knob_resize_factor)
+        self.knob_icon_factor = handle_value("knob_icon", self.knob_icon_factor)
+        self.trigger_opacity = handle_value("trigger_opacity", self.trigger_opacity, True)
         
         stretch_image = (self.image_resize_type == Qt.KeepAspectRatioByExpanding)
-        stretch_image = handle_value(settings, "stretch_image", stretch_image, load, True)
+        stretch_image = handle_value("stretch_image", stretch_image, True)
         if stretch_image:
             self.image_resize_type = Qt.KeepAspectRatioByExpanding
         else:
@@ -148,71 +164,72 @@ class Config(QObject):
         settings.endGroup()  # GUI
 
         settings.beginGroup("Camera")
-        self.camera_memory = handle_value(settings, "memory_type", self.camera_memory, load)
+        self.camera_memory = handle_value("memory_type", self.camera_memory)
         settings.endGroup()  # Camera
 
         settings.beginGroup("Timer")
-        self.countdown = handle_value(settings, "countdown", self.countdown, load, True)
-        self.bist_interval = handle_value(settings, "bist_interval", self.bist_interval, load)
+        self.countdown = handle_value("countdown", self.countdown, True)
+        self.bist_interval = handle_value("bist_interval", self.bist_interval)
         settings.endGroup()  # Timer
 
         settings.beginGroup("USB")
-        self.usb_file_string = handle_value(settings, "filename", self.usb_file_string, load)
-        self.usb_path = handle_value(settings, "path", self.usb_path, load)
-        self.usb_root = handle_value(settings, "root", self.usb_root, load)  # byte-string
+        self.usb_file_string = handle_value("filename", self.usb_file_string)
+        self.usb_path = handle_value("path", self.usb_path)
+        self.usb_root = handle_value("root", self.usb_root)  # byte-string
         settings.endGroup()  # USB
 
     def handle_gui(self, load):
-        def handle_text(line, text, load):
+        self.log.debug("handle_gui")
+        def handle_text(line, text):
             if load:
                 line.setText(text)
             else:
                 text = line.text()
             return text
 
-        self.usb_path = handle_text(self.ui.lineUsbPath, self.usb_path, load)
-        self.usb_file_string = handle_text(self.ui.lineUsbFilename, self.usb_file_string, load)
-        self.usb_root = handle_text(self.ui.lineUsbRoot, self.usb_root, load)
+        self.usb_path = handle_text(self.ui.lineUsbPath, self.usb_path)
+        self.usb_file_string = handle_text(self.ui.lineUsbFilename, self.usb_file_string)
+        self.usb_root = handle_text(self.ui.lineUsbRoot, self.usb_root)
 
-        def handle_value(spin, value, load):
+        def handle_value(spin, value):
             if load:
                 spin.setValue(value)
             else:
                 value = spin.value()
             return value
 
-        self.countdown = handle_value(self.ui.slideCountdown, self.countdown, load)
+        self.countdown = handle_value(self.ui.slideCountdown, self.countdown)
         
         # low space internally in KB but config GUI in MB
         low_space_mb = self.low_space // 1000
-        low_space_mb = handle_value(self.ui.spinLowMemory, low_space_mb, load)
+        low_space_mb = handle_value(self.ui.spinLowMemory, low_space_mb)
         self.low_space = low_space_mb * 1000
         
         # critical space internally in KB but config GUI in MB
         critical_space_mb = self.critical_space // 1000
-        critical_space_mb = handle_value(self.ui.spinCriticalMemory, critical_space_mb, load)
+        critical_space_mb = handle_value(self.ui.spinCriticalMemory, critical_space_mb)
         self.critical_space = critical_space_mb * 1000
         
-        self.bist_interval = handle_value(self.ui.spinBistInterval, self.bist_interval, load)
-        self.knob_resize_factor = handle_value(self.ui.spinKnobResize, self.knob_resize_factor, load)
-        self.knob_icon_factor = handle_value(self.ui.spinKnobIcon, self.knob_icon_factor, load)
+        self.bist_interval = handle_value(self.ui.spinBistInterval, self.bist_interval)
+        self.knob_resize_factor = handle_value(self.ui.spinKnobResize, self.knob_resize_factor)
+        self.knob_icon_factor = handle_value(self.ui.spinKnobIcon, self.knob_icon_factor)
 
         # on GUI: transparency / internally: opacity
         value = int((1 - self.trigger_opacity)*100)
-        value = handle_value(self.ui.slideTransparency, value, load)
+        value = handle_value(self.ui.slideTransparency, value)
         self.trigger_opacity = 1 - value/100
 
-        def handle_check(check, var, load):
+        def handle_check(check, var):
             if load:
                 check.setChecked(var)
             else:
                 var = check.isChecked()
             return var
 
-        self.image_mirrored = handle_check(self.ui.ckImageMirrored, self.image_mirrored, load)
+        self.image_mirrored = handle_check(self.ui.ckImageMirrored, self.image_mirrored)
 
         stretch_image = (self.image_resize_type == Qt.KeepAspectRatioByExpanding)
-        stretch_image = handle_check(self.ui.ckImageFit, stretch_image, load)
+        stretch_image = handle_check(self.ui.ckImageFit, stretch_image)
         if stretch_image:
             self.image_resize_type = Qt.KeepAspectRatioByExpanding
         else:
@@ -228,13 +245,16 @@ class Config(QObject):
             self.camera_memory = self.ui.comboCameraMemory.currentText()
 
     def load_from_file(self):
+        self.log.info("load_from_file")
         self.handle_config_file(True)
 
     def store_to_file(self):
+        self.log.info("store_to_file")
         self.handle_config_file(False)
 
     def open_config(self, usb_space, cam_space, cam_memory):
-        
+        self.log.info(str("open_config(usb_space={}, cam_space={}, cam_memory={})").format(usb_space, cam_space, cam_memory))
+
         # fill start-page
         self.ui.labUsbSpace.setText(str("{} MB").format(usb_space // 1000))
         self.set_space_icon(self.ui.labUsbSpaceIcon, usb_space)
@@ -268,6 +288,7 @@ class Config(QObject):
             self.ui.spinLowMemory.setValue(value)
 
     def slot_new_config(self):
+        self.log.debug("slot_new_config")
         # assign all new values
         self.handle_gui(False)
 
@@ -281,17 +302,26 @@ class Config(QObject):
         self.sig_finished.emit()
 
     def slot_reset(self):
+        self.log.debug("slot_reset")
         self.slot_new_config()
         self.sig_reset.emit()
         
     def slot_restore_defaults(self):
+        self.log.debug("slot_restore_defaults")
         self.load_defaults()
         self.handle_gui(True)
 
 
 if __name__ == "__main__":
+    logs.logger.change_level(logging.DEBUG)
+
+    logging.info("QApplication()")
     app = QApplication(sys.argv)
+    logging.info("QDialog()")
     MainWindow = QDialog()
+    logging.info("Config(MainWindow, const.INI_FILE, True)")
     config = Config(MainWindow, const.INI_FILE, True)
+    logging.info("config.open_config(50000,50000, ['SD', 'internal memory'])")
     config.open_config(50000,50000, ["SD", "internal memory"])
+    logging.info("sys.exit(app.exec_())")
     sys.exit(app.exec_())

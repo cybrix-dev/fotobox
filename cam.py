@@ -1,4 +1,5 @@
 import logging
+from logs import logger 
 
 try:
     import gphoto2 as gp
@@ -21,9 +22,10 @@ MEM_INDEX = 2
 class Camera:
 
     def __init__(self, memory_type=None):
+        self.log = logger.add_module("Camera")
+        
         if debug:
-            print('debug')
-        logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.INFO)
+            self.log.info('debug mode without actual camera')
         self.last_image = False
         self.memory_type = memory_type
         
@@ -53,7 +55,7 @@ class Camera:
                 value = gp.check_result(gp.gp_widget_get_value(image_format))
                 # make sure it's not raw
                 if 'raw' in value.lower():
-                    print('Cannot preview raw images')
+                    self.log.error('Cannot preview raw images')
                     return 1
             # find the capture size class config item
             # need to set this on my Canon 350d to get preview to work at all
@@ -127,7 +129,7 @@ class Camera:
     def dismiss_last(self):
         if self.last_image:
             if debug:
-                print("Dismiss last image")
+                self.log.debug("Dismiss last image")
             else:
                 gp.check_result(gp.gp_camera_file_delete(self.cam,
                                         self.file_path.folder,
@@ -137,7 +139,7 @@ class Camera:
     def store_last(self,dest):
         if self.last_image:
             if debug:
-                print("Store last image on USB: ", dest)
+                self.log.debug("Store last image on USB: ", dest)
             else:
                 camera_file = gp.check_result(gp.gp_camera_file_get(self.cam,
                                                     self.file_path.folder,
@@ -147,16 +149,16 @@ class Camera:
             self.last_image = False
 
     def print_mem_device(self, mem):
-        print("description:   ", mem.description)
-        print("basedir:       ", mem.basedir)
-        print("label:         ", mem.label)
-        print("type:          ", mem.type)
-        print("fstype:        ", mem.fstype)
-        print("access:        ", mem.access)
-        print("capacitykbytes:", mem.capacitykbytes)
-        print("freekbytes:    ", mem.freekbytes)
-        print("freeimages:    ", mem.freeimages)
-        print("fields:        ", mem.fields)
+        self.log.info(str("description:   ", mem.description))
+        self.log.info(str("basedir:       ", mem.basedir))
+        self.log.info(str("label:         ", mem.label))
+        self.log.info(str("type:          ", mem.type))
+        self.log.info(str("fstype:        ", mem.fstype))
+        self.log.info(str("access:        ", mem.access))
+        self.log.info(str("capacitykbytes:", mem.capacitykbytes))
+        self.log.info(str("freekbytes:    ", mem.freekbytes))
+        self.log.info(str("freeimages:    ", mem.freeimages))
+        self.log.info(str("fields:        ", mem.fields))
 
     def get_available_space(self):
         result = -1
@@ -182,17 +184,19 @@ class Camera:
                 
         self.available_memory = result
             
-
         
 if __name__ == "__main__":
+    logger.change_level(logging.DEBUG)
     cam = Camera("SD")
     
-    print(cam.available_memory)
-    print(cam.get_available_space())
+    logging.info("cam.available_memory: %a", cam.available_memory)
+    logging.info("cam.get_available_space(): %a", cam.get_available_space())
     
+    logging.info("cam.capture_image()")
     cam.capture_image()
+    logging.info("cam.dismiss_last()")
     cam.dismiss_last()
+    logging.info("cam.capture_image()")
     cam.capture_image()
+    logging.info("cam.store_last()")
     cam.store_last("./test0.jpg")
-    
-    
