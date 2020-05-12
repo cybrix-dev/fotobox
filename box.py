@@ -486,6 +486,11 @@ def start_gui(argv):
 
 
 if __name__ == "__main__":
+    import logging
+    
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+
     result = start_gui(sys.argv)
     print("Result: ", result)
     sys.exit(result)

@@ -1,9 +1,9 @@
 import logging
+import time
 
 try:
     import gphoto2 as gp
 except:
-    import time
     import io
     import const
 
@@ -23,9 +23,13 @@ class Camera:
     def __init__(self, memory_type=None):
         if debug:
             print('debug')
+            
+        print(time.strftime("Preview error: %H-%M-%S"))
         logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.INFO)
         self.last_image = False
         self.memory_type = memory_type
+        self.last_image = None
+        self.is_error = False
         
         if debug:
             self.index = 0
@@ -102,8 +106,18 @@ class Camera:
                 file = const.IMG_PATH + '/test3.jpg'
             return io.FileIO(file).read()
         else:
+            self.is_error = False
+            try:
+                self.last_image = gp.check_result(gp.gp_camera_capture_preview(self.cam))
+            except:
+                '''
+                mark error
+                '''
+                print(time.strftime("Preview error: %H-%M-%S"))
+                self.is_error = True
+                
             # capture preview image (not saved to camera memory card)
-            return self.prepare_pixmap( gp.check_result(gp.gp_camera_capture_preview(self.cam)))
+            return self.prepare_pixmap(self.last_image)
 
     def capture_image(self):
         self.last_image = True
