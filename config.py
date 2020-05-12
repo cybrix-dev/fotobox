@@ -324,4 +324,6 @@ if __name__ == "__main__":
     logging.info("config.open_config(50000,50000, ['SD', 'internal memory'])")
     config.open_config(50000,50000, ["SD", "internal memory"])
     logging.info("sys.exit(app.exec_())")
+    
+    config.ui.btReset.clicked.connect(config.ui.buttonBox.close)
     sys.exit(app.exec_())
