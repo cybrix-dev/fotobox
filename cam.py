@@ -190,16 +190,16 @@ class Camera:
             self.last_image = False
 
     def print_mem_device(self, mem):
-        self.log.info(str("description:   ", mem.description))
-        self.log.info(str("basedir:       ", mem.basedir))
-        self.log.info(str("label:         ", mem.label))
-        self.log.info(str("type:          ", mem.type))
-        self.log.info(str("fstype:        ", mem.fstype))
-        self.log.info(str("access:        ", mem.access))
-        self.log.info(str("capacitykbytes:", mem.capacitykbytes))
-        self.log.info(str("freekbytes:    ", mem.freekbytes))
-        self.log.info(str("freeimages:    ", mem.freeimages))
-        self.log.info(str("fields:        ", mem.fields))
+        self.log.info(str("description:   {}").format(mem.description))
+        self.log.info(str("basedir:       {}").format(mem.basedir))
+        self.log.info(str("label:         {}").format(mem.label))
+        self.log.info(str("type:          {}").format(mem.type))
+        self.log.info(str("fstype:        {}").format(mem.fstype))
+        self.log.info(str("access:        {}").format(mem.access))
+        self.log.info(str("capacitykbytes:{}").format(mem.capacitykbytes))
+        self.log.info(str("freekbytes:    {}").format(mem.freekbytes))
+        self.log.info(str("freeimages:    {}").format(mem.freeimages))
+        self.log.info(str("fields:        {}").format(mem.fields))
 
     def get_available_space(self):
         result = -1
