@@ -55,6 +55,8 @@ MEMSTATE_LOW     = 1   #
 MEMSTATE_FULL    = 2   # 
 MEMSTATE_MISSING = 3   # 
 
+MAX_ERROR_COUNT  = 20  # maximum number of subsequent errors before gracious reset
+
 
 def setup_logs(log_level):
     logging.basicConfig(format="%(asctime)s - %(name)-12s - %(levelname)-10s - %(message)s", level=log_level)

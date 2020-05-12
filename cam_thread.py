@@ -27,6 +27,7 @@ class Threading(QThread):
     sig_live_view = pyqtSignal(object)
     sig_photo = pyqtSignal(object)
     sig_error = pyqtSignal(object)
+    sig_critical = pyqtSignal(int)
 
     def __init__(self, parent, expected_memory):
         self.log = logs.logger.add_module("Threading")
@@ -116,6 +117,8 @@ class Threading(QThread):
                 else:
                     self.msleep(100)
 
+            if self.cam.error_count > const.MAX_ERROR_COUNT:
+                self.sig_critical.emit(self.cam.error_count)
 
 if __name__ == "__main__":
     import sys

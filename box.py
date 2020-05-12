@@ -120,6 +120,7 @@ class Box(QObject):
         self.thread.sig_live_view.connect(self.slot_preview)
         self.thread.sig_photo.connect(self.slot_image)
         self.thread.sig_error.connect(self.slot_error_preview)
+        self.thread.sig_critical.connect(self.slot_critical_reset)
         
         self.usbOutputPath = ""
         
@@ -447,6 +448,13 @@ class Box(QObject):
         self.showImage(image)
         self.ui.btAbbruch.show()
         self.show_trigger(False)
+        
+    def slot_critical_reset(self, error_count):
+        '''
+        Receiver-slot fuer kritische Fehler -> Neustart der Applikation
+        '''
+        self.log.critical("Terminate application after %a errors", error_count)
+        QApplication.exit(10)
         
     def slot_image(self, image):
         '''
