@@ -17,5 +17,8 @@ while res != 0:
         # serious bug, we just can just stop the application
         res = 0
         logging.critical("Fast error. Try calling box.py directly for more information")
-    else:
+    elif res != 0:
         logging.error(str("Restart with result {}").format(res))
+    else:
+        logging.error("Terminate")
+        
