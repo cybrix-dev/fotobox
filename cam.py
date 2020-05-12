@@ -26,12 +26,14 @@ class Camera:
         
         if debug:
             self.log.info('debug mode without actual camera')
-            
-        self.log.critical("Preview error") aaa
+
         self.last_image = False
         self.memory_type = memory_type
         self.last_image = None
-        self.is_error = False
+        
+        self.last_success = False
+        self.error_count = 0
+        self.global_errors = 0
         
         if debug:
             self.index = 0
@@ -85,13 +87,38 @@ class Camera:
                 gp.check_result(gp.gp_widget_set_value(capture_target_class, value))
                 # set config
                 gp.check_result(gp.gp_camera_set_config(self.cam, config))
+                
+    def check_success(self, result, name, reset_counter=False):
+        if not debug:
+            '''
+            Modified copy from gphoto2/result.py
+            '''
+            if not isinstance(result, (tuple, list)):
+                error = result
+            elif len(result) == 2:
+                error, result = result
+            else:
+                error = result[0]
+                result = result[1:]
+                
+            if error >= gp.GP_OK:
+                self.last_success = True
+                if reset_counter:
+                    self.error_count = 0
+            else:
+                self.last_success = False
+                self.error_count += 1
+                self.global_errors += 1
+                self.log.error(str("{} failed with {} - Errors in a row: {} / Errors since start: {}")
+                               .format(name, gp.gp_result_as_string(error), self.error_count, self.global_errors))
+            return result
 
     def set_memory_type(self, memory_type):
         # TODO: update destination-memory
         self.memory_type = memory_type
 
     def prepare_pixmap(self,camera_file):
-        return gp.check_result(gp.gp_file_get_data_and_size(camera_file))
+        return self.check_success(gp.gp_file_get_data_and_size(camera_file), "gp_file_get_data_and_size")
 
     def fetch_preview(self):
         '''
@@ -108,15 +135,9 @@ class Camera:
                 file = const.IMG_PATH + '/test3.jpg'
             return io.FileIO(file).read()
         else:
-            self.is_error = False
-            try:
-                self.last_image = gp.check_result(gp.gp_camera_capture_preview(self.cam))
-            except:
-                '''
-                mark error
-                '''
-                print(time.strftime("Preview error: %H-%M-%S"))
-                self.is_error = True
+            next_image = self.check_success(gp.gp_camera_capture_preview(self.cam), "Preview", True)
+            if self.last_success:
+                self.last_image = next_image
                 
             # capture preview image (not saved to camera memory card)
             return self.prepare_pixmap(self.last_image)
@@ -126,15 +147,16 @@ class Camera:
         if debug:
             result = io.FileIO(const.IMG_PATH + '/test4.jpg').read()
         else:
-            try:
-                self.file_path = gp.check_result(gp.gp_camera_capture(self.cam, gp.GP_CAPTURE_IMAGE))
-                camera_file = gp.check_result(gp.gp_camera_file_get(self.cam,
+            self.file_path = self.check_success(gp.gp_camera_capture(self.cam, gp.GP_CAPTURE_IMAGE), "Capture")
+            if self.last_success:
+                camera_file = self.check_success(gp.gp_camera_file_get(self.cam,
                                                     self.file_path.folder,
                                                     self.file_path.name,
-                                                    gp.GP_FILE_TYPE_NORMAL))
-
-                result = camera_file.get_data_and_size()
-            except:
+                                                    gp.GP_FILE_TYPE_NORMAL), "camera_file_get")
+                if self.last_success:
+                    result = camera_file.get_data_and_size()
+                    
+            if not self.last_success:
                 self.last_image = False
                 result = self.fetch_preview()
                 
@@ -145,21 +167,26 @@ class Camera:
             if debug:
                 self.log.debug("Dismiss last image")
             else:
-                gp.check_result(gp.gp_camera_file_delete(self.cam,
-                                        self.file_path.folder,
-                                        self.file_path.name))
+                self.check_success(gp.gp_camera_file_delete(self.cam,
+                                            self.file_path.folder,
+                                            self.file_path.name),
+                                   "camera_file_delete")
+
             self.last_image = False
 
     def store_last(self,dest):
         if self.last_image:
             if debug:
-                self.log.debug("Store last image on USB: ", dest)
+                self.log.debug("Store last image on USB: " + dest)
             else:
-                camera_file = gp.check_result(gp.gp_camera_file_get(self.cam,
+                camera_file = self.check_success(gp.gp_camera_file_get(self.cam,
                                                     self.file_path.folder,
                                                     self.file_path.name,
-                                                    gp.GP_FILE_TYPE_NORMAL))
-                gp.check_result(gp.gp_file_save( camera_file, dest ))
+                                                    gp.GP_FILE_TYPE_NORMAL), "gp_camera_file_get")
+                if self.last_success:
+                    self.check_success(gp.gp_file_save(camera_file, dest), "gp_file_save")
+                    if self.last_success:
+                        self.log.debug("File stored: " + dest)
             self.last_image = False
 
     def print_mem_device(self, mem):
@@ -189,7 +216,7 @@ class Camera:
         else:
             result = []
             idx = 1
-            arr = gp.check_result(gp.gp_camera_get_storageinfo(self.cam))
+            arr = self.check_success(gp.gp_camera_get_storageinfo(self.cam), "gp_camera_get_storageinfo")
             for mem in arr:
                 if print_info:
                     self.print_mem_device(mem)
