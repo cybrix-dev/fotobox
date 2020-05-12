@@ -185,7 +185,8 @@ class Camera:
                                                     self.file_path.name,
                                                     gp.GP_FILE_TYPE_NORMAL), "gp_camera_file_get")
                 if self.last_success:
-                    self.check_success(gp.gp_file_save(camera_file, dest), "gp_file_save")
+                    self.check_success(gp.gp_file_save(camera_file, dest), 
+                                       str("gp_file_save({})").format(dest))
                     if self.last_success:
                         self.log.debug("File stored: " + dest)
             self.last_image = False
